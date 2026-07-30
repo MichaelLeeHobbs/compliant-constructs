@@ -9,9 +9,28 @@ compliant configuration is the default and the non-compliant one is unrepresenta
 ```ts
 import * as efs from '@ubercode/compliant-constructs/cmmc2/aws-efs'
 
-// `kmsKey` is required, not optional. `encrypted` cannot be set at all.
-// `removalPolicy` accepts RETAIN or SNAPSHOT, and nothing else.
+// `kmsKey` and `vpcSubnets` are required, where the CDK makes them optional.
+// `encrypted`, `allowAnonymousAccess`, `enableAutomaticBackups` and
+// `fileSystemPolicy` cannot be set at all - the construct owns them.
+// `removalPolicy` accepts only RETAIN or RETAIN_ON_UPDATE_OR_DELETE.
 const fs = new efs.FileSystem(this, 'Data', { vpc, vpcSubnets, kmsKey })
+```
+
+Or take the whole compliant arrangement, which adds the pieces a file system cannot provide for
+itself - a rotating customer-managed key, a default-deny security group, and enrolment in an AWS
+Backup plan writing to an encrypted vault:
+
+```ts
+import { CompliantStack } from '@ubercode/compliant-constructs/cmmc2'
+import { EncryptedFileSystem } from '@ubercode/compliant-constructs/cmmc2/patterns'
+
+const stack = new CompliantStack(app, 'Storage', {
+  // Typed and required, replacing StackProps.tags. `containsCui` is the
+  // machine-readable form of your assessment scope boundary.
+  requiredTags: { project: 'vanguard', owner: 'platform', environment: 'prod', containsCui: true },
+})
+
+new EncryptedFileSystem(stack, 'Cui', { vpc, vpcSubnets, fileSystemName: 'vanguard-cui' })
 ```
 
 ## Read this before you use it
@@ -41,9 +60,27 @@ Three layers, because a typed wrapper on its own is opt-in and bypassable.
 
 The enforcement layer is cdk-nag's `NIST80053R5Checks`, not a bespoke rule engine. CMMC Level 2
 practices derive from NIST SP 800-171 Rev 2, which in turn derives from 800-53, so that pack already
-covers most of the ground. This library's own acceptance gate is:
+covers most of the ground.
+
+Wire it in at the app level, where it fails your build. Note that cdk-nag v3 is a CDK policy
+validation plugin, not an Aspect - `Aspects.of(app).add(...)` was the v2 API:
+
+```ts
+import { Validations } from 'aws-cdk-lib'
+import { NIST80053R5Checks } from 'cdk-nag'
+
+Validations.of(app).addPlugins(new NIST80053R5Checks(app))
+```
+
+This library's own acceptance gate is:
 
 > Every construct here passes `NIST80053R5Checks` with zero suppressions.
+
+`EncryptedFileSystem` meets that, and there is a test asserting it. The 1:1 `FileSystem` wrapper
+cannot: `EFSInBackupPlan` wants an `AWS::Backup::BackupSelection`, and a drop-in replacement for
+`efs.FileSystem` has no business creating resources the construct it replaces does not. Its one
+outstanding finding is pinned by a test, so a future cdk-nag adding an EFS rule fails the build here
+rather than surfacing in your audit.
 
 ## Evidence generation
 
@@ -65,7 +102,12 @@ gap.
 pnpm add @ubercode/compliant-constructs
 ```
 
-Peer dependencies: `aws-cdk-lib` (>= 2.165.0), `constructs` (>= 10), `cdk-nag` (>= 3).
+Peer dependencies: `aws-cdk-lib` (>= 2.257.0) and `constructs` (>= 10).
+
+`cdk-nag` (>= 3) is an **optional** peer, needed only for the `/verify` subpath and for wiring the
+rule pack into your own app. The constructs themselves have no dependency on it. The 2.257.0 floor
+is set by cdk-nag v3, which requires it; the constructs alone work on older CDK, but that is not a
+combination this project's own test suite can exercise, so it is not a compatibility claim we make.
 
 ## Design notes
 
