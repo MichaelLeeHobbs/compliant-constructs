@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Pin the floor (20.9.0 matches `engines` in package.json) so a
+        # regression that only appears on 20.9-20.12 still fails CI.
+        node-version: [20.9.0, 22, 24]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm run test:types
+
+      - run: pnpm run test:cover
+
+      - run: pnpm run build
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-node-${{ matrix.node-version }}
+          path: coverage/
+
+  # The library narrows aws-cdk-lib prop types with Omit<> and re-required
+  # fields. If AWS renames or removes a prop, those narrowings silently become
+  # no-ops. Type-checking against the declared peer floor as well as the latest
+  # release turns that into a red build instead of a shipped hole.
+  cdk-version-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cdk-version: ['2.165.0', 'latest']
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm add -D aws-cdk-lib@${{ matrix.cdk-version }}
+
+      - run: pnpm run test:types
+
+      - run: pnpm run test:unit
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      # Dev tooling (ESLint 10, Prettier) requires Node >= 20.12 (util.styleText),
+      # above the library's 20.9.0 runtime floor - so run it once on a modern
+      # Node rather than across the runtime matrix above.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm run test:format
+
+      - run: pnpm run test:lint

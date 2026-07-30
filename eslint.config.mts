@@ -1,0 +1,110 @@
+import js from '@eslint/js'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
+import prettierConfig from 'eslint-config-prettier'
+
+export default tseslint.config(
+  {
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/coverage/**',
+      '**/.git/**',
+      '**/.github/**',
+      '**/*.d.ts',
+      // Generated at build time by scripts/gen-subpath-stubs.mjs.
+      'cmmc2/**',
+      // Illustrative sample apps - kept readable rather than held to the
+      // library's strict lint rules.
+      'examples/**',
+    ],
+  },
+
+  js.configs.recommended,
+
+  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
+
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: {
+          allowDefaultProject: [
+            'eslint.config.mts',
+            'jest.config.ts',
+            'tsup.config.ts',
+            'scripts/gen-subpath-stubs.mjs',
+          ],
+        },
+        tsconfigRootDir: import.meta.dirname,
+      },
+      globals: {
+        ...globals.node,
+        ...globals.es2022,
+      },
+    },
+  },
+
+  {
+    files: ['**/*.{ts,mts,cts}'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
+      ],
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unnecessary-condition': 'warn',
+      '@typescript-eslint/explicit-function-return-type': 'error',
+      // Deliberately off: the CDK's public API is class-based (Construct,
+      // Stack, IVpc), and none of those are structurally readonly. Enabling
+      // this rule would warn on essentially every construct signature we write.
+      '@typescript-eslint/prefer-readonly-parameter-types': 'off',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'max-lines-per-function': ['warn', { max: 40, skipBlankLines: true, skipComments: true }],
+      complexity: ['error', 10],
+    },
+  },
+
+  // Build scripts read package.json via JSON.parse, which is `any` by
+  // definition. Casting through a schema type here would be ceremony around a
+  // file whose only consumer is our own build.
+  {
+    files: ['scripts/**/*.{mjs,js}'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+    },
+  },
+
+  {
+    files: ['tests/**/*.{ts,mts}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      'max-lines-per-function': 'off',
+    },
+  },
+
+  // Must be last so it can turn off stylistic rules that conflict with Prettier.
+  prettierConfig
+)

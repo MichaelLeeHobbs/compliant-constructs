@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noErrorTruncation": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    // aws-cdk-lib's declarations are jsii-generated and are not written to
+    // survive `exactOptionalPropertyTypes` (dozens of TS2420 errors on
+    // StackSynthesizer, Step, etc.). We keep the strict flag for our own
+    // source, which is the code we can actually fix, and skip checking AWS's
+    // shipped .d.ts files, which we cannot.
+    "skipLibCheck": true,
+    "rootDir": "src",
+    "ignoreDeprecations": "6.0"
+  }
+}

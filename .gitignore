@@ -1,0 +1,20 @@
+Thumbs.db
+.DS_Store
+npm-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+node_modules/
+test-results.xml
+coverage/
+.nyc_output/
+.idea
+/dist/
+*.tsbuildinfo
+.eslintcache
+cdk.out/
+# Generated at build time by scripts/gen-subpath-stubs.mjs - one directory per
+# published subpath, so classic node10 resolution can find it.
+/cmmc2/
+/.claude/settings.local.json
+*.tgz
