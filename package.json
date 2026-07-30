@@ -71,6 +71,7 @@
   "files": [
     "dist/",
     "cmmc2/",
+    "data/MANIFEST.json",
     "README.md",
     "LICENSE"
   ],
@@ -85,17 +86,19 @@
     "version:minor": "npm version minor",
     "version:patch": "npm version patch",
     "dry-run": "npm pack --dry-run",
-    "test": "pnpm run test:format && pnpm run test:lint && pnpm run test:types && pnpm run test:unit",
+    "test": "pnpm run test:format && pnpm run test:lint && pnpm run catalog:check && pnpm run test:types && pnpm run test:unit",
     "test:format": "prettier --check \"{src,tests,scripts}/**/*.{ts,mjs,js,json,md}\" \"*.{mts,ts,json,md}\" \".github/**/*.yml\"",
     "test:lint": "eslint",
     "test:types": "tsc --noEmit",
     "test:unit": "node node_modules/jest/bin/jest.js",
     "test:cover": "node node_modules/jest/bin/jest.js --coverage",
     "test:watch": "node node_modules/jest/bin/jest.js --watch",
-    "test:ci": "pnpm run test:format && pnpm run test:lint && pnpm run test:types && pnpm run test:cover",
+    "test:ci": "pnpm run test:format && pnpm run test:lint && pnpm run catalog:check && pnpm run test:types && pnpm run test:cover",
     "format": "prettier --write \"{src,tests,scripts}/**/*.{ts,mjs,js,json,md}\" \"*.{mts,ts,json,md}\" \".github/**/*.yml\"",
     "lint": "eslint --fix",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "catalog:build": "node scripts/build-catalog.mjs",
+    "catalog:check": "node scripts/build-catalog.mjs --check"
   },
   "publishConfig": {
     "access": "public"

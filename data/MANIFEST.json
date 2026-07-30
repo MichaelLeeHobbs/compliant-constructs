@@ -1,0 +1,33 @@
+{
+  "$comment": [
+    "Provenance for every vendored data file. Nothing enters this directory without an entry here.",
+    "Two rules: (1) only sources whose license permits redistribution in a permissively-licensed",
+    "package, which in practice means US Government works; (2) every file is checksummed, and the",
+    "catalog generator refuses to run if a checksum does not match. The vendored data is the root of",
+    "trust for every control claim this library makes, so changing it must be a deliberate,",
+    "reviewed act rather than a silent drift.",
+    "Sources with restrictive licenses (notably the Secure Controls Framework crosswalk, CC BY-ND)",
+    "must not be vendored here, nor consulted to generate content, even for development only."
+  ],
+  "files": [
+    {
+      "id": "sp800-171r2-security-reqs",
+      "path": "nist/sp800-171r2-security-reqs.csv",
+      "title": "NIST SP 800-171 Rev. 2 (upd1) - Security Requirements (CSV)",
+      "publisher": "National Institute of Standards and Technology",
+      "url": "https://csrc.nist.gov/files/pubs/sp/800/171/r2/upd1/final/docs/sp800-171r2-security-reqs.csv",
+      "landingPage": "https://csrc.nist.gov/pubs/sp/800/171/r2/upd1/final",
+      "retrieved": "2026-07-30",
+      "sha256": "0f4d59413bbcc9998da80495ce46ebfe0475e392803c4d2ed38d9941d83f138d",
+      "license": "US Government work, public domain (17 U.S.C. 105)",
+      "usedBy": ["scripts/build-catalog.mjs"],
+      "notes": [
+        "NIST withdrew Rev 2 on 2024-05-14, superseded by Rev 3. Do NOT upgrade this file to Rev 3.",
+        "CMMC Level 2 remains pinned to Rev 2 by 32 CFR Part 170 and the May 2024 DFARS class",
+        "deviation, and C3PAO assessments are written against Rev 2 objectives. Rev 3 rulemaking is",
+        "in progress; when it completes, add Rev 3 alongside this file rather than replacing it, and",
+        "widen Cmmc2Revision accordingly."
+      ]
+    }
+  ]
+}
