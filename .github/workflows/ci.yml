@@ -88,3 +88,10 @@ jobs:
       - run: pnpm run test:format
 
       - run: pnpm run test:lint
+
+      # Regenerates the catalog from the vendored NIST CSV and fails if the
+      # committed file differs. Runs here rather than in the matrix above so it
+      # executes once - but it must run on Linux specifically, since that is
+      # where a line-ending normalisation would break the vendored file's
+      # checksum.
+      - run: pnpm run catalog:check
