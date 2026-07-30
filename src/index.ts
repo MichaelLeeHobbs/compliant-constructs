@@ -110,3 +110,11 @@ export function collectControlClaims(root: IConstruct): LocatedControlClaim[] {
 
   return found
 }
+
+export {
+  REQUIRED_TAG_KEYS,
+  applyRequiredTags,
+  findUntaggableResources,
+  type RequiredTags,
+  type UntaggableResource,
+} from './tagging.js'

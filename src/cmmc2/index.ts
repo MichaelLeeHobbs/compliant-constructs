@@ -57,3 +57,5 @@ export function cmmc2Claim(props: Cmmc2ClaimProps): ControlClaim {
     ...(props.caveat === undefined ? {} : { caveat: props.caveat }),
   }
 }
+
+export { CompliantStack, type CompliantStackProps } from './stack.js'

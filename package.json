@@ -23,7 +23,7 @@
   },
   "packageManager": "pnpm@10.33.4",
   "peerDependencies": {
-    "aws-cdk-lib": "^2.165.0",
+    "aws-cdk-lib": "^2.257.0",
     "cdk-nag": "^3.0.0",
     "constructs": "^10.0.0"
   },
@@ -61,10 +61,25 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
+    "./verify": {
+      "types": "./dist/verify.d.ts",
+      "import": "./dist/verify.mjs",
+      "require": "./dist/verify.js"
+    },
     "./cmmc2": {
       "types": "./dist/cmmc2/index.d.ts",
       "import": "./dist/cmmc2/index.mjs",
       "require": "./dist/cmmc2/index.js"
+    },
+    "./cmmc2/aws-efs": {
+      "types": "./dist/cmmc2/aws-efs/index.d.ts",
+      "import": "./dist/cmmc2/aws-efs/index.mjs",
+      "require": "./dist/cmmc2/aws-efs/index.js"
+    },
+    "./cmmc2/patterns": {
+      "types": "./dist/cmmc2/patterns/index.d.ts",
+      "import": "./dist/cmmc2/patterns/index.mjs",
+      "require": "./dist/cmmc2/patterns/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -76,7 +91,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "clean": "rimraf dist coverage cmmc2",
+    "clean": "rimraf dist coverage cmmc2 verify",
     "build": "tsup && node scripts/gen-subpath-stubs.mjs",
     "build:watch": "tsup --watch",
     "prepublishOnly": "pnpm run test && pnpm run build",
@@ -121,5 +136,10 @@
   "lint-staged": {
     "*.{ts,js,mjs,json,md}": "prettier --write",
     "*.{ts,js,mjs}": "eslint --fix"
+  },
+  "peerDependenciesMeta": {
+    "cdk-nag": {
+      "optional": true
+    }
   }
 }
