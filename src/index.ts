@@ -35,6 +35,14 @@ export interface ControlClaim {
   /** Framework this control belongs to, e.g. `'cmmc2'`. */
   readonly framework: string
 
+  /**
+   * Revision of the framework the claim is made against, e.g. `'rev2'`.
+   *
+   * Recorded because control text and numbering move between revisions, and a
+   * generated evidence report has to say which one it is describing.
+   */
+  readonly frameworkRevision?: string
+
   /** Control or practice identifier within the framework, e.g. `'SC.L2-3.13.16'`. */
   readonly controlId: string
 

@@ -1,1 +1,7 @@
 * text=auto eol=lf
+
+# Vendored upstream data must stay byte-identical to the published source, or
+# its sha256 in data/MANIFEST.json stops matching and the catalog generator
+# refuses to run. NIST ships this CSV with CRLF line endings; without -text,
+# git would normalise them and the checksum would fail on a Linux CI runner.
+data/** -text
