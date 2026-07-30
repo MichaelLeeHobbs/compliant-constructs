@@ -1,0 +1,23 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "cmmc",
+    "ubercode",
+    "jsii",
+    "tsup",
+    "cdk",
+    "cdks",
+    "GovCloud",
+    "elasticfilesystem",
+    "Cfn",
+    "kms",
+    "efs",
+    "nag",
+    "keepachangelog",
+    "tsbuildinfo",
+    "eslintcache",
+    "unrs"
+  ],
+  "ignorePaths": ["node_modules/**", "dist/**", "coverage/**", "pnpm-lock.yaml", "cmmc2/**"]
+}
