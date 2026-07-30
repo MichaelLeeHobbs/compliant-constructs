@@ -66,6 +66,11 @@
       "import": "./dist/verify.mjs",
       "require": "./dist/verify.js"
     },
+    "./report": {
+      "types": "./dist/report/index.d.ts",
+      "import": "./dist/report/index.mjs",
+      "require": "./dist/report/index.js"
+    },
     "./cmmc2": {
       "types": "./dist/cmmc2/index.d.ts",
       "import": "./dist/cmmc2/index.mjs",
@@ -91,7 +96,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "clean": "rimraf dist coverage cmmc2 verify",
+    "clean": "rimraf dist coverage cmmc2 verify report",
     "build": "tsup && node scripts/gen-subpath-stubs.mjs",
     "build:watch": "tsup --watch",
     "prepublishOnly": "pnpm run test && pnpm run build",
@@ -113,7 +118,9 @@
     "lint": "eslint --fix",
     "precommit": "lint-staged",
     "catalog:build": "node scripts/build-catalog.mjs",
-    "catalog:check": "node scripts/build-catalog.mjs --check"
+    "catalog:check": "node scripts/build-catalog.mjs --check",
+    "coverage:build": "node scripts/build-coverage.mjs",
+    "coverage:check": "node scripts/build-coverage.mjs --check"
   },
   "publishConfig": {
     "access": "public"
@@ -141,5 +148,8 @@
     "cdk-nag": {
       "optional": true
     }
+  },
+  "bin": {
+    "attest": "./dist/cli/bin.js"
   }
 }

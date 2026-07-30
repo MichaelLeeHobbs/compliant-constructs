@@ -95,3 +95,10 @@ jobs:
       # where a line-ending normalisation would break the vendored file's
       # checksum.
       - run: pnpm run catalog:check
+
+      # coverage:check runs the reference app against dist/ and re-renders the
+      # committed reports through the attest CLI, so a claim that changed
+      # without docs/ and the README being regenerated fails here.
+      - run: pnpm run build
+
+      - run: pnpm run coverage:check

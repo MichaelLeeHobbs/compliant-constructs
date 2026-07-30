@@ -7,6 +7,9 @@ export default defineConfig({
   entry: [
     'src/index.ts',
     'src/verify.ts',
+    'src/report/index.ts',
+    'src/cli/attest.ts',
+    'src/cli/bin.ts',
     'src/cmmc2/index.ts',
     'src/cmmc2/aws-efs/index.ts',
     'src/cmmc2/patterns/index.ts',

@@ -17,5 +17,6 @@ cdk.out/
 # published subpath, so classic node10 resolution can find it.
 /cmmc2/
 /verify/
+/report/
 /.claude/settings.local.json
 *.tgz
