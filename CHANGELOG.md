@@ -38,6 +38,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Compile-time negative tests (`tests/types.compile.ts`) asserting that non-compliant
   configurations do not typecheck.
 
+- `/report` subpath: `buildAttestation()`, `writeAttestation()` and renderers producing
+  `coverage.md`, `evidence.csv`, `untagged.csv` and `attestation.json` from control-claim metadata.
+- `attest` CLI, rendering those reports from a committed attestation and injecting a coverage table
+  between markers in a README. `--check` fails CI when committed reports are stale.
+- Generated coverage documentation for this library: `docs/coverage.md` and the README coverage
+  table, both produced by `pnpm run coverage:build` and verified by `pnpm run coverage:check`.
+
 ### Changed
 
 - **Peer dependencies:** `aws-cdk-lib` floor raised to `^2.257.0`, and `cdk-nag` is now optional.

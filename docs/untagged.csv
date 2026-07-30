@@ -1,0 +1,9 @@
+construct_path,cfn_type,reason
+ReferenceStack/CuiStorage/Key/Alias/Resource,AWS::KMS::Alias,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiStorage/FileSystem/EfsMountTarget1,AWS::EFS::MountTarget,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiStorage/FileSystem/EfsMountTarget2,AWS::EFS::MountTarget,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiStorage/BackupVault/Resource,AWS::Backup::BackupVault,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiStorage/BackupPlan/Resource,AWS::Backup::BackupPlan,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiStorage/BackupPlan/BackupSelection/Resource,AWS::Backup::BackupSelection,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/StandaloneFileSystem/EfsMountTarget1,AWS::EFS::MountTarget,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/StandaloneFileSystem/EfsMountTarget2,AWS::EFS::MountTarget,CloudFormation resource type has no tags property; CDK tagging cannot reach it
