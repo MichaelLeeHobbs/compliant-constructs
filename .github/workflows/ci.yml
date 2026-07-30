@@ -3,8 +3,10 @@ name: CI
 on:
   push:
     branches: [main]
+  # Deliberately unfiltered by base branch: a PR stacked on another PR targets
+  # its parent branch, not main, and would otherwise get no CI at all until the
+  # parent merged and GitHub retargeted it.
   pull_request:
-    branches: [main]
 
 jobs:
   test:
