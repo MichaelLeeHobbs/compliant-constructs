@@ -516,6 +516,28 @@
             "evidence": "Log group retained for 1 year (default)",
             "caveat": "Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs."
           }
+        },
+        {
+          "path": "ReferenceStack/Processor/LogGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Log group retained for 1 year (default)",
+            "caveat": "Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs."
+          }
+        },
+        {
+          "path": "ReferenceStack/Processor/Function",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Logs written to an explicit log group with a retention period, rather than one Lambda creates outside the stack; X-Ray tracing enabled",
+            "caveat": "Produces invocation records and traces. Whether the function logs enough to investigate unauthorised activity is a property of its code."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -623,6 +645,34 @@
             ],
             "caveat": "Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern."
           }
+        },
+        {
+          "path": "ReferenceStack/Processor",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.8",
+            "satisfaction": "partial",
+            "evidence": "Function logs go to a declared log group encrypted with a customer-managed key, rather than the unencrypted one Lambda would create outside the stack",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Protects the records at rest. Deletion is still governed by IAM, and retention by the log group rather than by any immutable store."
+          }
+        },
+        {
+          "path": "ReferenceStack/Processor/LogGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.8",
+            "satisfaction": "partial",
+            "evidence": "Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -672,6 +722,17 @@
             "satisfaction": "supporting",
             "evidence": "AutoMinorVersionUpgrade=true and DeletionProtection=true, so the instance stays patched and cannot be removed by an unreviewed stack change",
             "caveat": "Baseline configuration of this one resource. Says nothing about the inventory or change control process the practice actually asks for."
+          }
+        },
+        {
+          "path": "ReferenceStack/Processor/Function",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "CM.L2-3.4.1",
+            "satisfaction": "supporting",
+            "evidence": "Log group is a declared resource, so it appears in the deployed inventory",
+            "caveat": "A function whose log group is implicit is invisible to any inventory built from CloudFormation. Declaring it is a precondition for a baseline, not a baseline itself."
           }
         }
       ],
@@ -1301,6 +1362,17 @@
             "evidence": "Automated backups retained for 35 days, encrypted with the CMK",
             "caveat": "Automated backups only. The instance is not enrolled in an AWS Backup plan, so retention beyond the RDS window is not governed here - see EncryptedDatabaseInstance."
           }
+        },
+        {
+          "path": "ReferenceStack/Records",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "MP.L2-3.8.9",
+            "satisfaction": "partial",
+            "evidence": "Point-in-time recovery enabled with a 35-day window",
+            "caveat": "Allows restore to any second in the window. Does not evidence that a restore has ever been tested, nor retention beyond the window."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -1681,6 +1753,48 @@
             "evidence": "Bucket policy denies all requests where aws:SecureTransport is false",
             "caveat": "Enforces TLS at the bucket. Does not evidence protection of CUI in transit elsewhere in the system."
           }
+        },
+        {
+          "path": "ReferenceStack/WorkQueue",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.8",
+            "satisfaction": "partial",
+            "evidence": "Queue policy denies any action where aws:SecureTransport is false",
+            "nagRuleIds": [
+              "NIST.800.53.R5-SQSQueueSSL"
+            ],
+            "caveat": "Enforces TLS to the queue endpoint. Does not evidence protection of CUI in transit elsewhere in the system."
+          }
+        },
+        {
+          "path": "ReferenceStack/Notifications",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.8",
+            "satisfaction": "partial",
+            "evidence": "Topic policy denies publishing where aws:SecureTransport is false",
+            "nagRuleIds": [
+              "NIST.800.53.R5-SNSTopicSSLPublishOnly"
+            ],
+            "caveat": "Enforces TLS for publishers. Delivery to subscribers uses whatever protocol the subscription specifies, which this construct does not control."
+          }
+        },
+        {
+          "path": "ReferenceStack/Processor/DeadLetterQueue",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.8",
+            "satisfaction": "partial",
+            "evidence": "Queue policy denies any action where aws:SecureTransport is false",
+            "nagRuleIds": [
+              "NIST.800.53.R5-SQSQueueSSL"
+            ],
+            "caveat": "Enforces TLS to the queue endpoint. Does not evidence protection of CUI in transit elsewhere in the system."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -1990,6 +2104,84 @@
             ],
             "caveat": "Protects the stored value. Says nothing about how the secret is handled once a consumer has retrieved it."
           }
+        },
+        {
+          "path": "ReferenceStack/WorkQueue",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "Server-side encryption with a customer-managed KMS key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-SQSQueueSSE"
+            ],
+            "caveat": "Covers messages at rest in the queue. Says nothing about how producers or consumers handle the payload."
+          }
+        },
+        {
+          "path": "ReferenceStack/Notifications",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "Server-side encryption with a customer-managed KMS key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-SNSEncryptedKMS"
+            ],
+            "caveat": "Covers messages held by SNS. Once delivered to a subscriber, protection is that subscriber’s concern."
+          }
+        },
+        {
+          "path": "ReferenceStack/Records",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "Encrypted at rest with a customer-managed KMS key",
+            "caveat": "Covers the table, its indexes and its streams. Exports to S3 are encrypted by the destination bucket, not by this setting."
+          }
+        },
+        {
+          "path": "ReferenceStack/Processor/LogGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "supporting",
+            "evidence": "KmsKeyId set to a customer-managed key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Applies to log data only, and only to records written after the key was attached."
+          }
+        },
+        {
+          "path": "ReferenceStack/Processor/DeadLetterQueue",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "Server-side encryption with a customer-managed KMS key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-SQSQueueSSE"
+            ],
+            "caveat": "Covers messages at rest in the queue. Says nothing about how producers or consumers handle the payload."
+          }
+        },
+        {
+          "path": "ReferenceStack/Processor/Function",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "Environment variables encrypted with a customer-managed KMS key",
+            "caveat": "Covers configuration held on the function. Does not cover data the function reads or writes at runtime, nor the deployment package itself."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -2178,6 +2370,26 @@
     {
       "path": "ReferenceStack/RotatedCredential/Policy/Resource",
       "cfnType": "AWS::SecretsManager::ResourcePolicy"
+    },
+    {
+      "path": "ReferenceStack/WorkQueue/Policy/Resource",
+      "cfnType": "AWS::SQS::QueuePolicy"
+    },
+    {
+      "path": "ReferenceStack/Notifications/Policy/Resource",
+      "cfnType": "AWS::SNS::TopicPolicy"
+    },
+    {
+      "path": "ReferenceStack/Records/Resource",
+      "cfnType": "AWS::DynamoDB::GlobalTable"
+    },
+    {
+      "path": "ReferenceStack/Processor/DeadLetterQueue/Policy/Resource",
+      "cfnType": "AWS::SQS::QueuePolicy"
+    },
+    {
+      "path": "ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource",
+      "cfnType": "AWS::IAM::Policy"
     }
   ],
   "violations": [
@@ -2232,6 +2444,27 @@
       "description": "The secret does not have automatic rotation scheduled - (Control IDs: AC-4, AC-4(22), AC-24(1), AU-9(3), CA-9b, PM-17b, SC-7(4)(b), SC-7(4)(g), SC-8, SC-8(1), SC-8(2), SC-8(3), SC-8(4), SC-8(5), SC-13a, SC-23, SI-1a.2, SI-1a.2, SI-1c.2). Rotating secrets on a regular schedule can shorten the period a secret is active, and potentially reduce the business impact if the secret is compromised.",
       "resources": [
         "ReferenceStack/ApiCredential/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-IAMNoInlinePolicy",
+      "description": "The IAM Group, User, or Role contains an inline policy - (Control IDs: AC-2i.2, AC-2(1), AC-2(6), AC-3, AC-3(3)(a), AC-3(3)(b)(1), AC-3(3)(b)(2), AC-3(3)(b)(3), AC-3(3)(b)(4), AC-3(3)(b)(5), AC-3(3)(c), AC-3(3), AC-3(4)(a), AC-3(4)(b), AC-3(4)(c), AC-3(4)(d), AC-3(4)(e), AC-3(4), AC-3(7), AC-3(8), AC-3(12)(a), AC-3(13), AC-3(15)(a), AC-3(15)(b), AC-4(28), AC-6, AC-6(3), AC-24, CM-5(1)(a), CM-6a, CM-9b, MP-2, SC-23(3)). AWS recommends to use managed policies instead of inline policies. The managed policies allow reusability, versioning and rolling back, and delegating permissions management.",
+      "resources": [
+        "ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-LambdaConcurrency",
+      "description": "The Lambda function is not configured with function-level concurrent execution limits - (Control IDs: AU-12(3), AU-14a, AU-14b, CA-7, CA-7b, PM-14a.1, PM-14b, PM-31, SC-6). Ensure that a Lambda function's concurrency high and low limits are established. This can assist in baselining the number of requests that your function is serving at any given time.",
+      "resources": [
+        "ReferenceStack/Processor/Function/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-LambdaInsideVPC",
+      "description": "The Lambda function is not VPC enabled - (Control IDs: AC-2(6), AC-3, AC-3(7), AC-4(21), AC-6, AC-17b, AC-17(1), AC-17(1), AC-17(4)(a), AC-17(9), AC-17(10), MP-2, SC-7a, SC-7b, SC-7c, SC-7(2), SC-7(3), SC-7(9)(a), SC-7(11), SC-7(12), SC-7(16), SC-7(20), SC-7(21), SC-7(24)(b), SC-25). Because of their logical isolation, domains that reside within an Amazon VPC have an extra layer of security when compared to domains that use public endpoints.",
+      "resources": [
+        "ReferenceStack/Processor/Function/Resource"
       ]
     }
   ]

@@ -150,19 +150,23 @@ remedies. Silently inventing a key would quietly undo the guarantee that made it
 
 ## Modules
 
-| Import                     | Contains                                                           |
-| -------------------------- | ------------------------------------------------------------------ |
-| `cmmc2`                    | `CompliantStack`, the practice catalog, `cmmc2Claim()`             |
-| `cmmc2/aws-ec2`            | `SecurityGroup`                                                    |
-| `cmmc2/aws-efs`            | `FileSystem`                                                       |
-| `cmmc2/aws-kms`            | `Key`                                                              |
-| `cmmc2/aws-logs`           | `LogGroup`                                                         |
-| `cmmc2/aws-rds`            | `DatabaseInstance`                                                 |
-| `cmmc2/aws-s3`             | `Bucket`                                                           |
-| `cmmc2/aws-secretsmanager` | `Secret`                                                           |
-| `cmmc2/patterns`           | `EncryptedFileSystem`, `SecureBucket`, `EncryptedDatabaseInstance` |
-| `verify`                   | `verifyCompliance()` (needs the optional `cdk-nag` peer)           |
-| `report`                   | `writeAttestation()` and the renderers                             |
+| Import                     | Contains                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| `cmmc2`                    | `CompliantStack`, the practice catalog, `cmmc2Claim()`                               |
+| `cmmc2/aws-dynamodb`       | `Table`                                                                              |
+| `cmmc2/aws-ec2`            | `SecurityGroup`                                                                      |
+| `cmmc2/aws-efs`            | `FileSystem`                                                                         |
+| `cmmc2/aws-kms`            | `Key`                                                                                |
+| `cmmc2/aws-lambda`         | `Function`                                                                           |
+| `cmmc2/aws-logs`           | `LogGroup`                                                                           |
+| `cmmc2/aws-rds`            | `DatabaseInstance`                                                                   |
+| `cmmc2/aws-s3`             | `Bucket`                                                                             |
+| `cmmc2/aws-secretsmanager` | `Secret`                                                                             |
+| `cmmc2/aws-sns`            | `Topic`                                                                              |
+| `cmmc2/aws-sqs`            | `Queue`                                                                              |
+| `cmmc2/patterns`           | `EncryptedFileSystem`, `SecureBucket`, `EncryptedDatabaseInstance`, `SecureFunction` |
+| `verify`                   | `verifyCompliance()` (needs the optional `cdk-nag` peer)                             |
+| `report`                   | `writeAttestation()` and the renderers                                               |
 
 One constraint worth knowing: a compliant `Bucket` cannot receive another bucket's server access
 logs. `ObjectOwnership=BucketOwnerEnforced` disables ACLs, and CDK's log-delivery wiring sets one on

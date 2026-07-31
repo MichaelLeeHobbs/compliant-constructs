@@ -76,6 +76,11 @@
       "import": "./dist/cmmc2/index.mjs",
       "require": "./dist/cmmc2/index.js"
     },
+    "./cmmc2/aws-dynamodb": {
+      "types": "./dist/cmmc2/aws-dynamodb/index.d.ts",
+      "import": "./dist/cmmc2/aws-dynamodb/index.mjs",
+      "require": "./dist/cmmc2/aws-dynamodb/index.js"
+    },
     "./cmmc2/aws-ec2": {
       "types": "./dist/cmmc2/aws-ec2/index.d.ts",
       "import": "./dist/cmmc2/aws-ec2/index.mjs",
@@ -90,6 +95,11 @@
       "types": "./dist/cmmc2/aws-kms/index.d.ts",
       "import": "./dist/cmmc2/aws-kms/index.mjs",
       "require": "./dist/cmmc2/aws-kms/index.js"
+    },
+    "./cmmc2/aws-lambda": {
+      "types": "./dist/cmmc2/aws-lambda/index.d.ts",
+      "import": "./dist/cmmc2/aws-lambda/index.mjs",
+      "require": "./dist/cmmc2/aws-lambda/index.js"
     },
     "./cmmc2/aws-logs": {
       "types": "./dist/cmmc2/aws-logs/index.d.ts",
@@ -110,6 +120,16 @@
       "types": "./dist/cmmc2/aws-secretsmanager/index.d.ts",
       "import": "./dist/cmmc2/aws-secretsmanager/index.mjs",
       "require": "./dist/cmmc2/aws-secretsmanager/index.js"
+    },
+    "./cmmc2/aws-sns": {
+      "types": "./dist/cmmc2/aws-sns/index.d.ts",
+      "import": "./dist/cmmc2/aws-sns/index.mjs",
+      "require": "./dist/cmmc2/aws-sns/index.js"
+    },
+    "./cmmc2/aws-sqs": {
+      "types": "./dist/cmmc2/aws-sqs/index.d.ts",
+      "import": "./dist/cmmc2/aws-sqs/index.mjs",
+      "require": "./dist/cmmc2/aws-sqs/index.js"
     },
     "./cmmc2/patterns": {
       "types": "./dist/cmmc2/patterns/index.d.ts",

@@ -25,16 +25,21 @@ const kms = await import('aws-cdk-lib/aws-kms')
 
 const rds = await import('aws-cdk-lib/aws-rds')
 const sm = await import('aws-cdk-lib/aws-secretsmanager')
+const dynamodb = await import('aws-cdk-lib/aws-dynamodb')
+const lambda = await import('aws-cdk-lib/aws-lambda')
 
 const { CompliantStack } = await import('../dist/cmmc2/index.mjs')
 const { SecurityGroup } = await import('../dist/cmmc2/aws-ec2/index.mjs')
 const { Key } = await import('../dist/cmmc2/aws-kms/index.mjs')
 const { LogGroup } = await import('../dist/cmmc2/aws-logs/index.mjs')
 const { Secret } = await import('../dist/cmmc2/aws-secretsmanager/index.mjs')
+const { Queue } = await import('../dist/cmmc2/aws-sqs/index.mjs')
+const { Topic } = await import('../dist/cmmc2/aws-sns/index.mjs')
+const { Table } = await import('../dist/cmmc2/aws-dynamodb/index.mjs')
 const { FileSystem } = await import('../dist/cmmc2/aws-efs/index.mjs')
 const { Bucket } = await import('../dist/cmmc2/aws-s3/index.mjs')
 const { DatabaseInstance } = await import('../dist/cmmc2/aws-rds/index.mjs')
-const { EncryptedDatabaseInstance, EncryptedFileSystem, SecureBucket } =
+const { EncryptedDatabaseInstance, EncryptedFileSystem, SecureBucket, SecureFunction } =
   await import('../dist/cmmc2/patterns/index.mjs')
 const { buildAttestation } = await import('../dist/report/index.mjs')
 const { verifyCompliance } = await import('../dist/verify.mjs')
@@ -115,6 +120,17 @@ function referenceApp() {
   new SecurityGroup(stack, 'ServiceSecurityGroup', {
     vpc,
     description: 'Reference service security group',
+  })
+
+  new Queue(stack, 'WorkQueue')
+  new Topic(stack, 'Notifications')
+  new Table(stack, 'Records', {
+    partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+  })
+  new SecureFunction(stack, 'Processor', {
+    runtime: lambda.Runtime.NODEJS_22_X,
+    handler: 'index.handler',
+    code: lambda.Code.fromInline('exports.handler = async () => {}'),
   })
 
   return stack

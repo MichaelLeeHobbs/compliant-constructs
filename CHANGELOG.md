@@ -66,6 +66,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `cmmc2/aws-ec2` - `SecurityGroup`, closed in both address families by default, requiring a
   description, and refusing SSH or RDP ingress from `0.0.0.0/0` or `::/0`.
 
+- `cmmc2/aws-sqs` - `Queue`, mandating KMS customer-managed encryption and a TLS-only queue policy.
+- `cmmc2/aws-sns` - `Topic`, mandating KMS customer-managed encryption and TLS-only publishing.
+- `cmmc2/aws-dynamodb` - `Table`, mandating a customer-managed key and point-in-time recovery.
+  PITR is required even though the R5 pack does not check for it: a table is often the only copy
+  of what it holds.
+- `cmmc2/aws-lambda` - `Function`, requiring an explicit log group so the one Lambda creates for
+  itself - never in the template, never tagged, never encrypted, unbounded retention - stops being
+  invisible. Encrypts environment variables and enables tracing.
+- `cmmc2/patterns` - `SecureFunction`, creating that log group plus a dead-letter queue.
+
 ### Changed
 
 - **Encryption keys are now stack-scoped by default.** `kmsKey` / `encryptionKey` became optional on
