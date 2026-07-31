@@ -89,3 +89,84 @@ export class ApplicationLoadBalancer extends elbv2.ApplicationLoadBalancer {
     ])
   }
 }
+
+/** TLS policies this library will attach to a listener. */
+export type ModernSslPolicy =
+  | elbv2.SslPolicy.TLS13_RES
+  | elbv2.SslPolicy.TLS13_EXT1
+  | elbv2.SslPolicy.FORWARD_SECRECY_TLS12_RES_GCM
+
+export interface HttpsListenerOptions
+  extends Omit<elbv2.BaseApplicationListenerProps, 'protocol' | 'port' | 'sslPolicy' | 'open'> {
+  /**
+   * TLS policy. Defaults to `TLS13_RES`, which is TLS 1.3 and 1.2 with
+   * forward secrecy and no CBC ciphers.
+   *
+   * The wider policies AWS offers reach back to TLS 1.0 for compatibility with
+   * clients that should not be handling CUI. They are not representable here.
+   */
+  readonly sslPolicy?: ModernSslPolicy
+}
+
+/**
+ * Add an HTTPS listener with a modern TLS policy.
+ *
+ * `addListener` is inherited and can still create a plaintext HTTP listener,
+ * which is legitimate for the redirect described below. This is the method to
+ * reach for when the listener carries traffic.
+ */
+export function addHttpsListener(
+  loadBalancer: ApplicationLoadBalancer,
+  id: string,
+  options: HttpsListenerOptions
+): elbv2.ApplicationListener {
+  const listener = loadBalancer.addListener(id, {
+    ...options,
+    protocol: elbv2.ApplicationProtocol.HTTPS,
+    port: 443,
+    sslPolicy: options.sslPolicy ?? elbv2.SslPolicy.TLS13_RES,
+  })
+
+  addControlClaims(listener, [
+    cmmc2Claim({
+      practice: 'SC.L2-3.13.8',
+      satisfaction: 'partial',
+      evidence: `HTTPS listener on 443 with SSL policy ${options.sslPolicy ?? 'TLS13_RES'}`,
+      nagRuleIds: ['NIST.800.53.R5-ALBHttpToHttpsRedirection'],
+      caveat:
+        'Protects CUI between the client and the load balancer. Traffic from the load balancer ' +
+        'to a target uses whatever protocol the target group specifies.',
+    }),
+    cmmc2Claim({
+      practice: 'SC.L2-3.13.15',
+      satisfaction: 'partial',
+      evidence: 'Server certificate presented on every connection, with TLS 1.2 as the floor',
+      caveat:
+        'Authenticates the server to the client. Authenticating the client to the server needs ' +
+        'mutual TLS or an application-layer mechanism.',
+    }),
+  ])
+
+  return listener
+}
+
+/**
+ * Add a plaintext listener that does nothing but redirect to HTTPS.
+ *
+ * The one legitimate reason to open port 80 on a load balancer carrying CUI:
+ * a client that arrives on HTTP gets moved to HTTPS rather than being served.
+ */
+export function addHttpsRedirect(
+  loadBalancer: ApplicationLoadBalancer,
+  id = 'HttpRedirect'
+): elbv2.ApplicationListener {
+  return loadBalancer.addListener(id, {
+    protocol: elbv2.ApplicationProtocol.HTTP,
+    port: 80,
+    defaultAction: elbv2.ListenerAction.redirect({
+      protocol: 'HTTPS',
+      port: '443',
+      permanent: true,
+    }),
+  })
+}

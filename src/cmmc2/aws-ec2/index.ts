@@ -134,3 +134,5 @@ const REMEDY =
   'SSM Session Manager instead.'
 
 export { Vpc, type VpcProps } from "./vpc.js"
+
+export { InterfaceVpcEndpoint, type InterfaceVpcEndpointProps } from "./vpc-endpoint.js"
