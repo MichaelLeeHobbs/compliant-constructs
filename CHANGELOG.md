@@ -91,6 +91,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   via `addComplianceContainer()` run with a read-only root filesystem, cannot be privileged, and
   must have a log driver; services never receive a public IP.
 
+- `docs/design-principles.md`, stating the goal - a non-compliant resource should be hard to
+  express - and the eleven rules the constructs follow, from how to rank a mandate through to
+  pinning outstanding findings and attacking your own guarantees.
+
 ### Fixed
 
 - **`SecurityGroup` let `Port.allTraffic()` through from `0.0.0.0/0`.** That port shape emits

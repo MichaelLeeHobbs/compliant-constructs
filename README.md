@@ -6,6 +6,15 @@
 Compliance-hardened AWS CDK constructs. Same shape as the CDK modules you already use, but the
 compliant configuration is the default and the non-compliant one is unrepresentable.
 
+**The goal is that a non-compliant resource should be hard to express** — not discouraged, not
+flagged after the fact, but absent from the API you are handed. Every optional property left open is
+a way to build something non-compliant, so the default answer to "should the caller be able to set
+this?" is _no, the construct owns it_. Where the type system cannot reach, a constructor check does;
+where neither can, the gap is recorded in the evidence report rather than papered over.
+
+The rules the constructs follow, and the reasoning behind them, are in
+[`docs/design-principles.md`](docs/design-principles.md).
+
 ```ts
 import * as efs from '@ubercode/compliant-constructs/cmmc2/aws-efs'
 
