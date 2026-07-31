@@ -111,3 +111,5 @@ function assertNotPublicAdminAccess(peer: ec2.IPeer, connection: ec2.Port): void
     }
   }
 }
+
+export { Vpc, type VpcProps } from "./vpc.js"

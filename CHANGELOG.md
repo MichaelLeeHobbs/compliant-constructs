@@ -85,6 +85,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   It is the one bucket here without a customer-managed key, because ELB cannot deliver access
   logs to a KMS-encrypted bucket at all.
 
+- `cmmc2/aws-ec2` - `Vpc`, always flow-logged to an encrypted log group, with the default
+  security group stripped and public subnets no longer auto-assigning public IPs.
+- `cmmc2/aws-ecs` - `Cluster`, `FargateTaskDefinition` and `FargateService`. Containers added
+  via `addComplianceContainer()` run with a read-only root filesystem, cannot be privileged, and
+  must have a log driver; services never receive a public IP.
+
 ### Changed
 
 - **Encryption keys are now stack-scoped by default.** `kmsKey` / `encryptionKey` became optional on

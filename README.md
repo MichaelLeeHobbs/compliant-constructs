@@ -51,14 +51,14 @@ metadata that drives the constructs, so it cannot drift into overclaiming.
 
 <!-- compliant-constructs:coverage:start -->
 
-**13 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
+**16 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
 
 | Domain                                    | Addressed | Total   |
 | ----------------------------------------- | --------- | ------- |
 | AC - Access Control                       | 1         | 22      |
 | AT - Awareness and Training               | 0         | 3       |
 | AU - Audit and Accountability             | 3         | 9       |
-| CM - Configuration Management             | 1         | 9       |
+| CM - Configuration Management             | 2         | 9       |
 | IA - Identification and Authentication    | 2         | 11      |
 | IR - Incident Response                    | 0         | 3       |
 | MA - Maintenance                          | 0         | 6       |
@@ -67,9 +67,9 @@ metadata that drives the constructs, so it cannot drift into overclaiming.
 | PE - Physical Protection                  | 0         | 6       |
 | RA - Risk Assessment                      | 0         | 3       |
 | CA - Security Assessment                  | 0         | 4       |
-| SC - System and Communications Protection | 4         | 16      |
-| SI - System and Information Integrity     | 1         | 7       |
-| **Total**                                 | **13**    | **110** |
+| SC - System and Communications Protection | 5         | 16      |
+| SI - System and Information Integrity     | 2         | 7       |
+| **Total**                                 | **16**    | **110** |
 
 <!-- compliant-constructs:coverage:end -->
 
@@ -155,7 +155,8 @@ remedies. Silently inventing a key would quietly undo the guarantee that made it
 | `cmmc2`                            | `CompliantStack`, the practice catalog, `cmmc2Claim()`                                                   |
 | `cmmc2/aws-cloudtrail`             | `Trail`                                                                                                  |
 | `cmmc2/aws-dynamodb`               | `Table`                                                                                                  |
-| `cmmc2/aws-ec2`                    | `SecurityGroup`                                                                                          |
+| `cmmc2/aws-ec2`                    | `Vpc`, `SecurityGroup`                                                                                   |
+| `cmmc2/aws-ecs`                    | `Cluster`, `FargateTaskDefinition`, `FargateService`                                                     |
 | `cmmc2/aws-efs`                    | `FileSystem`                                                                                             |
 | `cmmc2/aws-elasticloadbalancingv2` | `ApplicationLoadBalancer`                                                                                |
 | `cmmc2/aws-kms`                    | `Key`                                                                                                    |
