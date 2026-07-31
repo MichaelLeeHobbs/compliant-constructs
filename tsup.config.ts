@@ -21,7 +21,12 @@ export default defineConfig({
     'src/cmmc2/patterns/index.ts',
   ],
   format: ['esm', 'cjs'],
-  dts: true,
+  // Declarations come from tsc (see tsconfig.build.json), not rollup-plugin-dts.
+  // With a dozen entry points each pulling the whole aws-cdk-lib type graph, the
+  // dts plugin exhausted the heap in its worker thread - and worker threads do
+  // not inherit --max-old-space-size from the parent. tsc emits the same tree
+  // for a fraction of the memory, and scales as modules are added.
+  dts: false,
   sourcemap: true,
   clean: true,
   // Shared internals are small; duplicating them per entry keeps the output
