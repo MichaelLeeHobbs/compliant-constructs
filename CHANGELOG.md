@@ -105,6 +105,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   This is what moves the CA and RA domains off zero: no amount of correct resource configuration
   answers whether security controls are monitored on an ongoing basis.
 
+- `verifyArchitecture()` - checks over the assembled construct graph, for the properties a
+  per-resource rule engine cannot see. A VPC with no endpoints and open egress passes the whole
+  NIST 800-53 R5 pack; these four checks are what notice.
+- `cmmc2/patterns` - `CuiVpc`, isolated subnets with no internet or NAT gateway, VPC endpoints
+  with private DNS, and network ACLs permitting VPC-internal traffic only. FIPS endpoint variants
+  are selected by default.
+- `cmmc2/patterns` - `SessionManagerAccess`, administrative access with no bastion and no inbound
+  port, session transcripts to an encrypted log group, and an idle timeout.
+- `cmmc2/patterns` - `EbsEncryptionByDefault`, an account-wide setting so volumes created outside
+  CloudFormation are encrypted too.
+- `cmmc2/aws-ec2` - `InterfaceVpcEndpoint`, mandating private DNS and its own narrow security
+  group.
+- `cmmc2/aws-certificatemanager` - `Certificate`, DNS-validated so ACM can renew it unattended.
+- `cmmc2/aws-wafv2` - `WebAcl`, managed rule groups in block mode rather than count.
+- `addHttpsListener()` and `addHttpsRedirect()` on the load balancer module, with TLS 1.3/1.2
+  policies only.
+
 ### Fixed
 
 - **`SecurityGroup` let `Port.allTraffic()` through from `0.0.0.0/0`.** That port shape emits

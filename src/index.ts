@@ -125,3 +125,10 @@ export {
 } from './removal-policy.js'
 
 export { type BucketReference } from './bucket-reference.js'
+
+export {
+  verifyArchitecture,
+  type ArchitectureFinding,
+  type ArchitectureResult,
+  type VerifyArchitectureOptions,
+} from './architecture.js'

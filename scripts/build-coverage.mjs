@@ -46,6 +46,9 @@ const { Bucket } = await import('../dist/cmmc2/aws-s3/index.mjs')
 const { DatabaseInstance } = await import('../dist/cmmc2/aws-rds/index.mjs')
 const {
   AccountBaseline,
+  CuiVpc,
+  EbsEncryptionByDefault,
+  SessionManagerAccess,
   EncryptedDatabaseInstance,
   EncryptedFileSystem,
   SecureBucket,
@@ -152,6 +155,9 @@ function referenceApp() {
   new FargateService(stack, 'Service', { cluster, taskDefinition })
 
   new AccountBaseline(stack, 'AccountBaseline', { name: 'reference' })
+  new CuiVpc(stack, 'CuiNetwork')
+  new SessionManagerAccess(stack, 'AdminAccess')
+  new EbsEncryptionByDefault(stack, 'EbsDefaults')
 
   const serviceLogs = new ServiceLogBucket(stack, 'ServiceLogs', {
     bucketName: 'reference-service-logs',

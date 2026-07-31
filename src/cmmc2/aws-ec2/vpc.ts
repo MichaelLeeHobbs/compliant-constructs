@@ -40,6 +40,10 @@ export interface VpcProps extends Omit<ec2.VpcProps, MandatedProps> {
  * public subnets, so anything launched there gets a routable address whether or
  * not anyone intended it. Turning it off means exposure has to be asked for.
  *
+ * **`IAMNoInlinePolicy` is outstanding and structural.** `addFlowLog` makes the
+ * CDK create a delivery role with an inline policy, and the alternative -
+ * turning flow logs off - is not one.
+ *
  * **`VPCNoUnrestrictedRouteToIGW` is outstanding whenever the VPC has public
  * subnets, and cannot be otherwise.** A public subnet is by definition one with
  * a default route to an internet gateway; the rule is really asking whether you

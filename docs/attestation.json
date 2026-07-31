@@ -276,7 +276,20 @@
         "nist800171": "3.1.12",
         "title": "Monitor and control remote access sessions."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/AdminAccess",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.12",
+            "satisfaction": "partial",
+            "evidence": "Every session is recorded to an encrypted log group with streaming enabled, and idles out after 15 minutes",
+            "caveat": "Records and time-bounds the sessions. Somebody still has to review the transcripts; monitoring is not the same as recording."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -289,7 +302,20 @@
         "nist800171": "3.1.13",
         "title": "Employ cryptographic mechanisms to protect the confidentiality of remote access sessions."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/AdminAccess",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.13",
+            "satisfaction": "partial",
+            "evidence": "Session channel is TLS to the Systems Manager service and the transcript is encrypted at rest with a customer-managed key",
+            "caveat": "Covers the session channel. Whatever the operator does inside the session is beyond its reach."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -302,7 +328,20 @@
         "nist800171": "3.1.14",
         "title": "Route remote access via managed access control points."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/AdminAccess",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.14",
+            "satisfaction": "partial",
+            "evidence": "Access is brokered entirely by Systems Manager - no bastion, no inbound SSH or RDP, and no public IP in the path",
+            "caveat": "Systems Manager is the managed access control point for this path. Any other route into the environment is outside what this construct establishes."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -380,7 +419,163 @@
         "nist800171": "3.1.20",
         "title": "Verify and control/limit connections to and use of external systems."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/CuiNetwork",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "The only reachable external systems are the AWS services with an endpoint here",
+            "caveat": "Limits connections to the services you provisioned an endpoint for. It does not verify what those services then do with the data."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/KMSEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/SECRETS_MANAGEREndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/CLOUDWATCH_LOGSEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/CLOUDWATCH_MONITORINGEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/SSMEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/SSM_MESSAGESEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/EC2_MESSAGESEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/STSEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/ECREndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/ECR_DOCKEREndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/CLOUDTRAILEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/CONFIGEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/ELASTIC_FILESYSTEMEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.20",
+            "satisfaction": "partial",
+            "evidence": "Private DNS enabled, so calls to this service resolve inside the VPC and never reach a public endpoint",
+            "caveat": "Covers this one service. Any AWS service without an endpoint is still reached over the internet, and this construct cannot know which ones your workload calls."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -654,6 +849,42 @@
           }
         },
         {
+          "path": "ReferenceStack/CuiNetwork/Vpc",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Flow logs for ALL traffic delivered to an encrypted CloudWatch log group",
+            "nagRuleIds": [
+              "NIST.800.53.R5-VPCFlowLogsEnabled"
+            ],
+            "caveat": "Records connection metadata - addresses, ports, bytes, accept or reject. It does not record payloads, so it will not tell you what was transferred."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/Vpc/FlowLogGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Log group retained for 1 year (default)",
+            "caveat": "Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs."
+          }
+        },
+        {
+          "path": "ReferenceStack/AdminAccess/SessionLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Log group retained for 1 year (default)",
+            "caveat": "Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs."
+          }
+        },
+        {
           "path": "ReferenceStack/Alb",
           "claim": {
             "framework": "cmmc2",
@@ -877,6 +1108,34 @@
               "NIST.800.53.R5-CloudTrailEncryptionEnabled"
             ],
             "caveat": "Digest files make tampering detectable after the fact. They do not make it impossible - that needs S3 Object Lock on the destination bucket."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/Vpc/FlowLogGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.8",
+            "satisfaction": "partial",
+            "evidence": "Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern."
+          }
+        },
+        {
+          "path": "ReferenceStack/AdminAccess/SessionLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.8",
+            "satisfaction": "partial",
+            "evidence": "Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern."
           }
         },
         {
@@ -1666,6 +1925,17 @@
             "evidence": "Versioning enabled, so overwritten and deleted objects remain recoverable",
             "caveat": "Versioning is not backup. There is no replication or lifecycle-governed retention here - see SecureBucket, and configure replication if your risk assessment needs it."
           }
+        },
+        {
+          "path": "ReferenceStack/EbsDefaults",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "MP.L2-3.8.9",
+            "satisfaction": "supporting",
+            "evidence": "Snapshots inherit encryption from the volume they are taken from",
+            "caveat": "Covers snapshots of encrypted volumes. Snapshots copied to another region or shared with another account need their own key arrangements."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -1950,7 +2220,163 @@
         "nist800171": "3.13.1",
         "title": "Monitor, control, and protect communications (i.e., information transmitted or received by organizational systems) at the external boundaries and key internal boundaries of organizational systems."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/CuiNetwork",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "All subnets isolated with no internet or NAT gateway; AWS services reached through 13 interface endpoints and 2 gateway endpoints; network ACLs permit traffic within the VPC only",
+            "caveat": "Protects the network boundary. Communications above the network layer, and anything reached through a connection added later, are outside what this establishes."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/KMSEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/SECRETS_MANAGEREndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/CLOUDWATCH_LOGSEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/CLOUDWATCH_MONITORINGEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/SSMEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/SSM_MESSAGESEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/EC2_MESSAGESEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/STSEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/ECREndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/ECR_DOCKEREndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/CLOUDTRAILEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/CONFIGEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/ELASTIC_FILESYSTEMEndpoint",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.1",
+            "satisfaction": "partial",
+            "evidence": "Service traffic stays on the AWS network, reachable on TCP 443 from the VPC CIDR only",
+            "caveat": "Removes one path across the boundary. Boundary protection as a whole depends on what other routes exist out of the subnet."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -1976,7 +2402,20 @@
         "nist800171": "3.13.3",
         "title": "Separate user functionality from system management functionality."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/AdminAccess",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.3",
+            "satisfaction": "supporting",
+            "evidence": "Administrative access travels a separate path from application traffic, over the SSM endpoints rather than any application listener",
+            "caveat": "Separates the management path at the network level. Separating user from administrator functionality inside the application is a design matter."
+          }
+        }
+      ],
+      "satisfaction": "supporting"
     },
     {
       "practice": {
@@ -2005,6 +2444,17 @@
       "claims": [
         {
           "path": "ReferenceStack/Network",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.5",
+            "satisfaction": "partial",
+            "evidence": "Subnet tiers separate publicly reachable components from internal ones",
+            "caveat": "Provides the separation only if the caller places workloads in the right tier. This construct builds the boundary; it does not police what crosses it."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/Vpc",
           "claim": {
             "framework": "cmmc2",
             "frameworkRevision": "rev2",
@@ -2076,6 +2526,32 @@
             ],
             "caveat": "Closes the two defaults that grant connectivity nobody asked for. The security groups actually attached to workloads are the caller’s to write."
           }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.6",
+            "satisfaction": "partial",
+            "evidence": "Network ACLs deny by default at the subnet layer, beneath the security groups that deny by default at the instance layer",
+            "caveat": "Two layers of deny-by-default. Rules the caller adds at either layer are their own responsibility."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/Vpc",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.6",
+            "satisfaction": "partial",
+            "evidence": "Default security group stripped of all rules; public subnets do not auto-assign public IP addresses",
+            "nagRuleIds": [
+              "NIST.800.53.R5-VPCDefaultSecurityGroupClosed",
+              "NIST.800.53.R5-VPCSubnetAutoAssignPublicIpDisabled"
+            ],
+            "caveat": "Closes the two defaults that grant connectivity nobody asked for. The security groups actually attached to workloads are the caller’s to write."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -2091,7 +2567,20 @@
         "nist800171": "3.13.7",
         "title": "Prevent remote devices from simultaneously establishing non-remote connections with organizational systems and communicating via some other connection to resources in external networks (i.e., split tunneling)."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/CuiNetwork",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.7",
+            "satisfaction": "partial",
+            "evidence": "No route exists from any subnet to the internet, so a workload cannot hold a session here and an external connection at the same time",
+            "caveat": "Applies to resources inside this VPC. Split tunnelling on an end-user device connecting to it is a client configuration matter."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -2216,7 +2705,20 @@
         "nist800171": "3.13.9",
         "title": "Terminate network connections associated with communications sessions at the end of the sessions or after a defined period of inactivity."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/AdminAccess",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.9",
+            "satisfaction": "partial",
+            "evidence": "Idle sessions are terminated after 15 minutes",
+            "caveat": "Terminates administrative sessions. Application-level sessions have their own timeouts, which this does not touch."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -2303,9 +2805,20 @@
             "evidence": "Encryption performed by AWS KMS",
             "caveat": "Whether the cryptography is FIPS-validated depends on the region and the endpoints in use, neither of which this construct controls."
           }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.11",
+            "satisfaction": "partial",
+            "evidence": "FIPS 140-validated endpoints selected for every service that offers one, so those API calls terminate on validated cryptographic modules",
+            "caveat": "Pins the endpoint, which is the part infrastructure controls. Whether the application itself uses validated cryptography is a property of its code."
+          }
         }
       ],
-      "satisfaction": "supporting"
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -2604,6 +3117,45 @@
               "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
             ],
             "caveat": "Applies to log data only, and only to records written after the key was attached."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiNetwork/Vpc/FlowLogGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "supporting",
+            "evidence": "KmsKeyId set to a customer-managed key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Applies to log data only, and only to records written after the key was attached."
+          }
+        },
+        {
+          "path": "ReferenceStack/AdminAccess/SessionLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "supporting",
+            "evidence": "KmsKeyId set to a customer-managed key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Applies to log data only, and only to records written after the key was attached."
+          }
+        },
+        {
+          "path": "ReferenceStack/EbsDefaults",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "EBS encryption by default enabled account-wide with a customer-managed key, so every volume created afterwards is encrypted regardless of how it was created",
+            "caveat": "Applies to volumes created after this is enabled, in this region. Volumes that already exist unencrypted stay that way until they are snapshotted and restored."
           }
         },
         {
@@ -2991,6 +3543,114 @@
       "cfnType": "AWS::SecurityHub::Standard"
     },
     {
+      "path": "ReferenceStack/CuiNetwork/Vpc/isolatedSubnet1/RouteTableAssociation",
+      "cfnType": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/Vpc/isolatedSubnet2/RouteTableAssociation",
+      "cfnType": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/Vpc/RestrictDefaultSecurityGroupCustomResource/Default",
+      "cfnType": "Custom::VpcRestrictDefaultSG"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/Vpc/FlowLog/IAMRole/DefaultPolicy/Resource",
+      "cfnType": "AWS::IAM::Policy"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/Vpc/S3Endpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/Vpc/DynamoDbEndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/NetworkAcl/DefaultAssociationReferenceStackCuiNetworkVpcisolatedSubnet108DA772C/Resource",
+      "cfnType": "AWS::EC2::SubnetNetworkAclAssociation"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/NetworkAcl/DefaultAssociationReferenceStackCuiNetworkVpcisolatedSubnet2F9E3DB05/Resource",
+      "cfnType": "AWS::EC2::SubnetNetworkAclAssociation"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/NetworkAcl/AllowInternalIngress/Resource",
+      "cfnType": "AWS::EC2::NetworkAclEntry"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/NetworkAcl/AllowInternalEgress/Resource",
+      "cfnType": "AWS::EC2::NetworkAclEntry"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/KMSEndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/SECRETS_MANAGEREndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/CLOUDWATCH_LOGSEndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/CLOUDWATCH_MONITORINGEndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/SSMEndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/SSM_MESSAGESEndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/EC2_MESSAGESEndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/STSEndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/ECREndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/ECR_DOCKEREndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/CLOUDTRAILEndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/CONFIGEndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/CuiNetwork/ELASTIC_FILESYSTEMEndpoint/Resource",
+      "cfnType": "AWS::EC2::VPCEndpoint"
+    },
+    {
+      "path": "ReferenceStack/EbsDefaults/EnableEncryption/Resource/Default",
+      "cfnType": "Custom::AWS"
+    },
+    {
+      "path": "ReferenceStack/EbsDefaults/EnableEncryption/CustomResourcePolicy/Resource",
+      "cfnType": "AWS::IAM::Policy"
+    },
+    {
+      "path": "ReferenceStack/EbsDefaults/SetDefaultKey/Resource/Default",
+      "cfnType": "Custom::AWS"
+    },
+    {
+      "path": "ReferenceStack/EbsDefaults/SetDefaultKey/CustomResourcePolicy/Resource",
+      "cfnType": "AWS::IAM::Policy"
+    },
+    {
       "path": "ReferenceStack/ServiceLogs/Bucket/Policy/Resource",
       "cfnType": "AWS::S3::BucketPolicy"
     },
@@ -3075,7 +3735,33 @@
         "ReferenceStack/Network/FlowLog/IAMRole/DefaultPolicy/Resource",
         "ReferenceStack/TaskDefinition/ExecutionRole/DefaultPolicy/Resource",
         "ReferenceStack/AccountBaseline/Trail/LogsRole/DefaultPolicy/Resource",
+        "ReferenceStack/CuiNetwork/Vpc/FlowLog/IAMRole/DefaultPolicy/Resource",
+        "ReferenceStack/EbsDefaults/EnableEncryption/CustomResourcePolicy/Resource",
+        "ReferenceStack/EbsDefaults/SetDefaultKey/CustomResourcePolicy/Resource",
         "ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-LambdaConcurrency",
+      "description": "The Lambda function is not configured with function-level concurrent execution limits - (Control IDs: AU-12(3), AU-14a, AU-14b, CA-7, CA-7b, PM-14a.1, PM-14b, PM-31, SC-6). Ensure that a Lambda function's concurrency high and low limits are established. This can assist in baselining the number of requests that your function is serving at any given time.",
+      "resources": [
+        "ReferenceStack/AWS679f53fac002430cb0da5b7982bd2287/Resource",
+        "ReferenceStack/Processor/Function/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-LambdaDLQ",
+      "description": "The Lambda function is not configured with a dead-letter configuration - (Control IDs: AU-12(3), AU-14a, AU-14b, CA-2(2), CA-7, CA-7b, PM-14a.1, PM-14b, PM-31, SC-36(1)(a), SI-2a). Notify the appropriate personnel through Amazon Simple Queue Service (Amazon SQS) or Amazon Simple Notification Service (Amazon SNS) when a function has failed.",
+      "resources": [
+        "ReferenceStack/AWS679f53fac002430cb0da5b7982bd2287/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-LambdaInsideVPC",
+      "description": "The Lambda function is not VPC enabled - (Control IDs: AC-2(6), AC-3, AC-3(7), AC-4(21), AC-6, AC-17b, AC-17(1), AC-17(1), AC-17(4)(a), AC-17(9), AC-17(10), MP-2, SC-7a, SC-7b, SC-7c, SC-7(2), SC-7(3), SC-7(9)(a), SC-7(11), SC-7(12), SC-7(16), SC-7(20), SC-7(21), SC-7(24)(b), SC-25). Because of their logical isolation, domains that reside within an Amazon VPC have an extra layer of security when compared to domains that use public endpoints.",
+      "resources": [
+        "ReferenceStack/AWS679f53fac002430cb0da5b7982bd2287/Resource",
+        "ReferenceStack/Processor/Function/Resource"
       ]
     },
     {
@@ -3097,20 +3783,6 @@
       "description": "The ALB is not associated with AWS WAFv2 web ACL - (Control ID: AC-4(21)). A WAF helps to protect your web applications or APIs against common web exploits. These web exploits may affect availability, compromise security, or consume excessive resources within your environment.",
       "resources": [
         "ReferenceStack/Alb/Resource"
-      ]
-    },
-    {
-      "ruleId": "NIST.800.53.R5-LambdaConcurrency",
-      "description": "The Lambda function is not configured with function-level concurrent execution limits - (Control IDs: AU-12(3), AU-14a, AU-14b, CA-7, CA-7b, PM-14a.1, PM-14b, PM-31, SC-6). Ensure that a Lambda function's concurrency high and low limits are established. This can assist in baselining the number of requests that your function is serving at any given time.",
-      "resources": [
-        "ReferenceStack/Processor/Function/Resource"
-      ]
-    },
-    {
-      "ruleId": "NIST.800.53.R5-LambdaInsideVPC",
-      "description": "The Lambda function is not VPC enabled - (Control IDs: AC-2(6), AC-3, AC-3(7), AC-4(21), AC-6, AC-17b, AC-17(1), AC-17(1), AC-17(4)(a), AC-17(9), AC-17(10), MP-2, SC-7a, SC-7b, SC-7c, SC-7(2), SC-7(3), SC-7(9)(a), SC-7(11), SC-7(12), SC-7(16), SC-7(20), SC-7(21), SC-7(24)(b), SC-25). Because of their logical isolation, domains that reside within an Amazon VPC have an extra layer of security when compared to domains that use public endpoints.",
-      "resources": [
-        "ReferenceStack/Processor/Function/Resource"
       ]
     }
   ]

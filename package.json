@@ -76,6 +76,11 @@
       "import": "./dist/cmmc2/index.mjs",
       "require": "./dist/cmmc2/index.js"
     },
+    "./cmmc2/aws-certificatemanager": {
+      "types": "./dist/cmmc2/aws-certificatemanager/index.d.ts",
+      "import": "./dist/cmmc2/aws-certificatemanager/index.mjs",
+      "require": "./dist/cmmc2/aws-certificatemanager/index.js"
+    },
     "./cmmc2/aws-cloudtrail": {
       "types": "./dist/cmmc2/aws-cloudtrail/index.d.ts",
       "import": "./dist/cmmc2/aws-cloudtrail/index.mjs",
@@ -160,6 +165,11 @@
       "types": "./dist/cmmc2/aws-sqs/index.d.ts",
       "import": "./dist/cmmc2/aws-sqs/index.mjs",
       "require": "./dist/cmmc2/aws-sqs/index.js"
+    },
+    "./cmmc2/aws-wafv2": {
+      "types": "./dist/cmmc2/aws-wafv2/index.d.ts",
+      "import": "./dist/cmmc2/aws-wafv2/index.mjs",
+      "require": "./dist/cmmc2/aws-wafv2/index.js"
     },
     "./cmmc2/patterns": {
       "types": "./dist/cmmc2/patterns/index.d.ts",

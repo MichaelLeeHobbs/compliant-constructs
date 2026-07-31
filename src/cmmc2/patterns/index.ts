@@ -161,3 +161,15 @@ export { SecureFunction, type SecureFunctionProps } from "./secure-function.js"
 export { ServiceLogBucket, type ServiceLogBucketProps } from "./service-log-bucket.js"
 
 export { AccountBaseline, type AccountBaselineProps } from "./account-baseline.js"
+
+export { CuiVpc, type CuiVpcProps, type PrivateService } from "./cui-vpc.js"
+
+export {
+  SessionManagerAccess,
+  type SessionManagerAccessProps,
+} from "./session-manager-access.js"
+
+export {
+  EbsEncryptionByDefault,
+  type EbsEncryptionByDefaultProps,
+} from "./ebs-encryption-by-default.js"
