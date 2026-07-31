@@ -62,8 +62,8 @@ export interface ContainerOptions extends Omit<ecs.ContainerDefinitionOptions, M
  * A Fargate task definition configured for CMMC 2.0 Level 2.
  *
  * A drop-in replacement for `ecs.FargateTaskDefinition`. Containers added
- * through {@link addContainer} run with a read-only root filesystem, cannot be
- * privileged, and must have a log driver.
+ * through {@link FargateTaskDefinition.addContainer} run with a read-only root
+ * filesystem, cannot be privileged, and must have a log driver.
  *
  * The read-only root filesystem is the one that changes behaviour most. It
  * stops a process that has been compromised from persisting anything to the
@@ -76,9 +76,25 @@ export class FargateTaskDefinition extends ecs.FargateTaskDefinition {
    *
    * Deliberately narrower than the method it overrides: `readonlyRootFilesystem`
    * and `privileged` are not yours to set, and `logging` is required.
+   *
+   * This overrides `addContainer` rather than sitting alongside it. An earlier
+   * version added a separate `addComplianceContainer` and left the inherited
+   * method untouched, which meant `addContainer` silently accepted
+   * `privileged: true` with a writable root and no logging - a complete bypass
+   * of everything this class exists to enforce, reachable by using the more
+   * obvious method name.
    */
-  addComplianceContainer(id: string, options: ContainerOptions): ecs.ContainerDefinition {
-    const container = this.addContainer(id, {
+  override addContainer(id: string, options: ContainerOptions): ecs.ContainerDefinition {
+    // Runtime check as well as the type: JavaScript callers, and anything
+    // reaching this through the base class signature, get the same guarantee.
+    if (options.logging === undefined) {
+      throw new Error(
+        `container "${id}" needs a log driver. Without one it writes nowhere, and whatever it ` +
+          'observed is gone when the task stops. Pass logging: ecs.LogDrivers.awsLogs({ ... }).'
+      )
+    }
+
+    const container = super.addContainer(id, {
       ...options,
       readonlyRootFilesystem: true,
       privileged: false,

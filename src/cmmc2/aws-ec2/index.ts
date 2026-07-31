@@ -95,21 +95,42 @@ function isWholeInternet(peer: ec2.IPeer): boolean {
 function assertNotPublicAdminAccess(peer: ec2.IPeer, connection: ec2.Port): void {
   if (!isWholeInternet(peer)) return
 
-  const rule = connection.toRuleJson() as { fromPort?: number; toPort?: number }
+  const rule = connection.toRuleJson() as {
+    ipProtocol?: string
+    fromPort?: number
+    toPort?: number
+  }
+
+  // `Port.allTraffic()` emits ipProtocol '-1' with no port range at all. It is
+  // the broadest rule there is, so it necessarily includes SSH and RDP - an
+  // earlier version of this check read fromPort first and returned early,
+  // which let the single most dangerous rule through untouched.
+  if (rule.ipProtocol === '-1') {
+    throw new Error(
+      `refusing to open all traffic to ${peer.uniqueId}, which includes SSH and RDP. ` +
+        REMEDY
+    )
+  }
+
+  // SSH and RDP are TCP. Blocking udp/22 would be a false positive, and a
+  // guard that fires on things it should not is a guard people route around.
+  if (rule.ipProtocol !== 'tcp') return
+
   const from = rule.fromPort
   const to = rule.toPort ?? rule.fromPort
-
   if (from === undefined || to === undefined) return
 
   for (const [port, name] of NEVER_PUBLIC_PORTS) {
     if (from <= port && port <= to) {
       throw new Error(
-        `refusing to open ${name} (port ${port}) to ${peer.uniqueId}. ` +
-          'Restrict the peer to a specific CIDR or security group, or reach the instance through ' +
-          'SSM Session Manager instead.'
+        `refusing to open ${name} (port ${port}) to ${peer.uniqueId}. ${REMEDY}`
       )
     }
   }
 }
+
+const REMEDY =
+  'Restrict the peer to a specific CIDR or security group, or reach the instance through ' +
+  'SSM Session Manager instead.'
 
 export { Vpc, type VpcProps } from "./vpc.js"

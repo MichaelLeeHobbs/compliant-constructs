@@ -156,6 +156,8 @@
   "files": [
     "dist/",
     "cmmc2/",
+    "report/",
+    "verify/",
     "data/MANIFEST.json",
     "README.md",
     "LICENSE"

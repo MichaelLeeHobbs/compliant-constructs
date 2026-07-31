@@ -28,10 +28,18 @@ export interface ServiceLogBucketProps {
  * Everything else the compliant `Bucket` mandates still applies: public access
  * fully blocked, TLS-only, versioned, retained.
  *
- * `S3DefaultEncryptionKMS` is therefore permanently outstanding here. It is
- * pinned by a test rather than suppressed, so the evidence report shows a
- * bucket holding log data under AWS-managed keys - which is the truth, and
- * something an assessor should see rather than have hidden.
+ * Three cdk-nag findings are outstanding here, all pinned by a test rather
+ * than suppressed:
+ *
+ * - `S3DefaultEncryptionKMS`, for the reason above.
+ * - `S3BucketLoggingEnabled`, because a bucket that receives access logs cannot
+ *   also deliver its own to itself. Point it at a separate log bucket if your
+ *   risk assessment wants logs about the logs.
+ * - `S3BucketReplicationEnabled`, the same opt-out the ordinary `Bucket` makes.
+ *
+ * All three show up in the evidence report - a bucket holding log data under
+ * AWS-managed keys, without its own access log, is the truth and something an
+ * assessor should see rather than have hidden.
  *
  * Use the ordinary `Bucket` for anything holding CUI. Use this only where an
  * AWS service refuses to deliver to a CMK-encrypted destination.
