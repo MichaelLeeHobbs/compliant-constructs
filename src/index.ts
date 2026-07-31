@@ -118,3 +118,8 @@ export {
   type RequiredTags,
   type UntaggableResource,
 } from './tagging.js'
+
+export {
+  type NonDestructiveRemovalPolicy,
+  type SnapshottableRemovalPolicy,
+} from './removal-policy.js'

@@ -81,6 +81,16 @@
       "import": "./dist/cmmc2/aws-efs/index.mjs",
       "require": "./dist/cmmc2/aws-efs/index.js"
     },
+    "./cmmc2/aws-rds": {
+      "types": "./dist/cmmc2/aws-rds/index.d.ts",
+      "import": "./dist/cmmc2/aws-rds/index.mjs",
+      "require": "./dist/cmmc2/aws-rds/index.js"
+    },
+    "./cmmc2/aws-s3": {
+      "types": "./dist/cmmc2/aws-s3/index.d.ts",
+      "import": "./dist/cmmc2/aws-s3/index.mjs",
+      "require": "./dist/cmmc2/aws-s3/index.js"
+    },
     "./cmmc2/patterns": {
       "types": "./dist/cmmc2/patterns/index.d.ts",
       "import": "./dist/cmmc2/patterns/index.mjs",
