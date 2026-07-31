@@ -157,3 +157,5 @@ export {
 } from "./encrypted-database.js"
 
 export { SecureFunction, type SecureFunctionProps } from "./secure-function.js"
+
+export { ServiceLogBucket, type ServiceLogBucketProps } from "./service-log-bucket.js"

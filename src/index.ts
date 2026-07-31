@@ -123,3 +123,5 @@ export {
   type NonDestructiveRemovalPolicy,
   type SnapshottableRemovalPolicy,
 } from './removal-policy.js'
+
+export { type BucketReference } from './bucket-reference.js'

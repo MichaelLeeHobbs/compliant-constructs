@@ -25,5 +25,7 @@ ReferenceStack/RotatedCredential/Policy/Resource,AWS::SecretsManager::ResourcePo
 ReferenceStack/WorkQueue/Policy/Resource,AWS::SQS::QueuePolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/Notifications/Policy/Resource,AWS::SNS::TopicPolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/Records/Resource,AWS::DynamoDB::GlobalTable,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/ServiceLogs/Bucket/Policy/Resource,AWS::S3::BucketPolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/Trail/LogsRole/DefaultPolicy/Resource,AWS::IAM::Policy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/Processor/DeadLetterQueue/Policy/Resource,AWS::SQS::QueuePolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource,AWS::IAM::Policy,CloudFormation resource type has no tags property; CDK tagging cannot reach it

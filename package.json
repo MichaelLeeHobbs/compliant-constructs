@@ -76,6 +76,11 @@
       "import": "./dist/cmmc2/index.mjs",
       "require": "./dist/cmmc2/index.js"
     },
+    "./cmmc2/aws-cloudtrail": {
+      "types": "./dist/cmmc2/aws-cloudtrail/index.d.ts",
+      "import": "./dist/cmmc2/aws-cloudtrail/index.mjs",
+      "require": "./dist/cmmc2/aws-cloudtrail/index.js"
+    },
     "./cmmc2/aws-dynamodb": {
       "types": "./dist/cmmc2/aws-dynamodb/index.d.ts",
       "import": "./dist/cmmc2/aws-dynamodb/index.mjs",
@@ -90,6 +95,11 @@
       "types": "./dist/cmmc2/aws-efs/index.d.ts",
       "import": "./dist/cmmc2/aws-efs/index.mjs",
       "require": "./dist/cmmc2/aws-efs/index.js"
+    },
+    "./cmmc2/aws-elasticloadbalancingv2": {
+      "types": "./dist/cmmc2/aws-elasticloadbalancingv2/index.d.ts",
+      "import": "./dist/cmmc2/aws-elasticloadbalancingv2/index.mjs",
+      "require": "./dist/cmmc2/aws-elasticloadbalancingv2/index.js"
     },
     "./cmmc2/aws-kms": {
       "types": "./dist/cmmc2/aws-kms/index.d.ts",

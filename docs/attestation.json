@@ -518,6 +518,45 @@
           }
         },
         {
+          "path": "ReferenceStack/Alb",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Access logs delivered to a dedicated bucket",
+            "nagRuleIds": [
+              "NIST.800.53.R5-ELBLoggingEnabled"
+            ],
+            "caveat": "Records requests reaching the load balancer. Requests handled entirely by a backend, or arriving by another path, are not captured here."
+          }
+        },
+        {
+          "path": "ReferenceStack/TrailLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Log group retained for 1 year (default)",
+            "caveat": "Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs."
+          }
+        },
+        {
+          "path": "ReferenceStack/Trail",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Multi-region trail including global service events, delivered to both S3 and a named CloudWatch log group",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudTrailCloudWatchLogsEnabled"
+            ],
+            "caveat": "Records management-plane activity. Data-plane events (S3 object access, Lambda invocations) are only captured if event selectors are configured for them."
+          }
+        },
+        {
           "path": "ReferenceStack/Processor/LogGroup",
           "claim": {
             "framework": "cmmc2",
@@ -553,7 +592,20 @@
         "nist800171": "3.3.2",
         "title": "Ensure that the actions of individual system users can be uniquely traced to those users, so they can be held accountable for their actions."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/Trail",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.2",
+            "satisfaction": "partial",
+            "evidence": "Every event records the IAM principal that made the call",
+            "caveat": "Traces actions to an IAM principal. Tracing that principal to an individual person depends on whether roles are assumed with unique identities."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -647,6 +699,46 @@
           }
         },
         {
+          "path": "ReferenceStack/ServiceLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.8",
+            "satisfaction": "partial",
+            "evidence": "Log destination is encrypted at rest with SSE-S3, blocks all public access, and requires TLS; versioning is on so a delivered object cannot be silently replaced",
+            "caveat": "Encryption uses AWS-managed keys, not a customer-managed key, because ELB and several other services cannot deliver logs to a KMS-encrypted bucket. Key custody for these records therefore sits with AWS."
+          }
+        },
+        {
+          "path": "ReferenceStack/TrailLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.8",
+            "satisfaction": "partial",
+            "evidence": "Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern."
+          }
+        },
+        {
+          "path": "ReferenceStack/Trail",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.8",
+            "satisfaction": "partial",
+            "evidence": "Log file validation enabled, producing signed digests; log files encrypted with a customer-managed key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudTrailLogFileValidationEnabled",
+              "NIST.800.53.R5-CloudTrailEncryptionEnabled"
+            ],
+            "caveat": "Digest files make tampering detectable after the fact. They do not make it impossible - that needs S3 Object Lock on the destination bucket."
+          }
+        },
+        {
           "path": "ReferenceStack/Processor",
           "claim": {
             "framework": "cmmc2",
@@ -722,6 +814,20 @@
             "satisfaction": "supporting",
             "evidence": "AutoMinorVersionUpgrade=true and DeletionProtection=true, so the instance stays patched and cannot be removed by an unreviewed stack change",
             "caveat": "Baseline configuration of this one resource. Says nothing about the inventory or change control process the practice actually asks for."
+          }
+        },
+        {
+          "path": "ReferenceStack/Alb",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "CM.L2-3.4.1",
+            "satisfaction": "supporting",
+            "evidence": "Deletion protection enabled",
+            "nagRuleIds": [
+              "NIST.800.53.R5-ELBDeletionProtectionEnabled"
+            ],
+            "caveat": "Prevents accidental removal of a component in the boundary. Says nothing about the wider configuration baseline."
           }
         },
         {
@@ -2145,6 +2251,20 @@
           }
         },
         {
+          "path": "ReferenceStack/TrailLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "supporting",
+            "evidence": "KmsKeyId set to a customer-managed key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Applies to log data only, and only to records written after the key was attached."
+          }
+        },
+        {
           "path": "ReferenceStack/Processor/LogGroup",
           "claim": {
             "framework": "cmmc2",
@@ -2197,7 +2317,23 @@
         "nist800171": "3.14.1",
         "title": "Identify, report, and correct system flaws in a timely manner."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/Alb",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SI.L2-3.14.1",
+            "satisfaction": "supporting",
+            "evidence": "routing.http.drop_invalid_header_fields.enabled=true, so malformed headers are rejected rather than forwarded to a backend",
+            "nagRuleIds": [
+              "NIST.800.53.R5-ALBHttpDropInvalidHeaderEnabled"
+            ],
+            "caveat": "Closes one class of request smuggling. Identifying and correcting flaws generally is a process, not a load balancer attribute."
+          }
+        }
+      ],
+      "satisfaction": "supporting"
     },
     {
       "practice": {
@@ -2384,6 +2520,14 @@
       "cfnType": "AWS::DynamoDB::GlobalTable"
     },
     {
+      "path": "ReferenceStack/ServiceLogs/Bucket/Policy/Resource",
+      "cfnType": "AWS::S3::BucketPolicy"
+    },
+    {
+      "path": "ReferenceStack/Trail/LogsRole/DefaultPolicy/Resource",
+      "cfnType": "AWS::IAM::Policy"
+    },
+    {
       "path": "ReferenceStack/Processor/DeadLetterQueue/Policy/Resource",
       "cfnType": "AWS::SQS::QueuePolicy"
     },
@@ -2406,7 +2550,8 @@
       "resources": [
         "ReferenceStack/CuiBucket/AccessLogs/Resource",
         "ReferenceStack/CuiBucket/Bucket/Resource",
-        "ReferenceStack/StandaloneBucket/Resource"
+        "ReferenceStack/StandaloneBucket/Resource",
+        "ReferenceStack/ServiceLogs/Bucket/Resource"
       ]
     },
     {
@@ -2447,9 +2592,31 @@
       ]
     },
     {
+      "ruleId": "NIST.800.53.R5-S3BucketLoggingEnabled",
+      "description": "The S3 Buckets does not have server access logs enabled - (Control IDs: AC-2(4), AC-3(1), AC-3(10), AC-4(26), AC-6(9), AU-2b, AU-3a, AU-3b, AU-3c, AU-3d, AU-3e, AU-3f, AU-6(3), AU-6(4), AU-6(6), AU-6(9), AU-8b, AU-10, AU-12a, AU-12c, AU-12(1), AU-12(2), AU-12(3), AU-12(4), AU-14a, AU-14b, AU-14b, AU-14(3), CA-7b, CM-5(1)(b), CM-6a, CM-9b, IA-3(3)(b), MA-4(1)(a), PM-14a.1, PM-14b, PM-31, SC-7(9)(b), SI-1(1)(c), SI-3(8)(b), SI-4(2), SI-4(17), SI-4(20), SI-7(8), SI-10(1)(c)). Amazon Simple Storage Service (Amazon S3) server access logging provides a method to monitor the network for potential cybersecurity events. The events are monitored by capturing detailed records for the requests that are made to an Amazon S3 bucket. Each access log record provides details about a single access request. The details include the requester, bucket name, request time, request action, response status, and an error code, if relevant.",
+      "resources": [
+        "ReferenceStack/ServiceLogs/Bucket/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-S3DefaultEncryptionKMS",
+      "description": "The S3 Bucket is not encrypted with a KMS Key by default - (Control IDs: AU-9(3), CP-9d, CP-9(8), SC-8(3), SC-8(4), SC-13a, SC-28(1), SI-19(4)). Ensure that encryption is enabled for your Amazon Simple Storage Service (Amazon S3) buckets. Because sensitive data can exist at rest in an Amazon S3 bucket, enable encryption at rest to help protect that data.",
+      "resources": [
+        "ReferenceStack/ServiceLogs/Bucket/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-ALBWAFEnabled",
+      "description": "The ALB is not associated with AWS WAFv2 web ACL - (Control ID: AC-4(21)). A WAF helps to protect your web applications or APIs against common web exploits. These web exploits may affect availability, compromise security, or consume excessive resources within your environment.",
+      "resources": [
+        "ReferenceStack/Alb/Resource"
+      ]
+    },
+    {
       "ruleId": "NIST.800.53.R5-IAMNoInlinePolicy",
       "description": "The IAM Group, User, or Role contains an inline policy - (Control IDs: AC-2i.2, AC-2(1), AC-2(6), AC-3, AC-3(3)(a), AC-3(3)(b)(1), AC-3(3)(b)(2), AC-3(3)(b)(3), AC-3(3)(b)(4), AC-3(3)(b)(5), AC-3(3)(c), AC-3(3), AC-3(4)(a), AC-3(4)(b), AC-3(4)(c), AC-3(4)(d), AC-3(4)(e), AC-3(4), AC-3(7), AC-3(8), AC-3(12)(a), AC-3(13), AC-3(15)(a), AC-3(15)(b), AC-4(28), AC-6, AC-6(3), AC-24, CM-5(1)(a), CM-6a, CM-9b, MP-2, SC-23(3)). AWS recommends to use managed policies instead of inline policies. The managed policies allow reusability, versioning and rolling back, and delegating permissions management.",
       "resources": [
+        "ReferenceStack/Trail/LogsRole/DefaultPolicy/Resource",
         "ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource"
       ]
     },

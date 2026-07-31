@@ -36,11 +36,19 @@ const { Secret } = await import('../dist/cmmc2/aws-secretsmanager/index.mjs')
 const { Queue } = await import('../dist/cmmc2/aws-sqs/index.mjs')
 const { Topic } = await import('../dist/cmmc2/aws-sns/index.mjs')
 const { Table } = await import('../dist/cmmc2/aws-dynamodb/index.mjs')
+const { Trail } = await import('../dist/cmmc2/aws-cloudtrail/index.mjs')
+const { ApplicationLoadBalancer } =
+  await import('../dist/cmmc2/aws-elasticloadbalancingv2/index.mjs')
 const { FileSystem } = await import('../dist/cmmc2/aws-efs/index.mjs')
 const { Bucket } = await import('../dist/cmmc2/aws-s3/index.mjs')
 const { DatabaseInstance } = await import('../dist/cmmc2/aws-rds/index.mjs')
-const { EncryptedDatabaseInstance, EncryptedFileSystem, SecureBucket, SecureFunction } =
-  await import('../dist/cmmc2/patterns/index.mjs')
+const {
+  EncryptedDatabaseInstance,
+  EncryptedFileSystem,
+  SecureBucket,
+  SecureFunction,
+  ServiceLogBucket,
+} = await import('../dist/cmmc2/patterns/index.mjs')
 const { buildAttestation } = await import('../dist/report/index.mjs')
 const { verifyCompliance } = await import('../dist/verify.mjs')
 const { main } = await import('../dist/cli/attest.mjs')
@@ -127,6 +135,19 @@ function referenceApp() {
   new Table(stack, 'Records', {
     partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
   })
+  const serviceLogs = new ServiceLogBucket(stack, 'ServiceLogs', {
+    bucketName: 'reference-service-logs',
+  })
+  new ApplicationLoadBalancer(stack, 'Alb', {
+    vpc,
+    internetFacing: false,
+    accessLogsBucket: serviceLogs.bucket,
+  })
+  new Trail(stack, 'Trail', {
+    bucket: cuiBucket.bucket,
+    cloudWatchLogGroup: new LogGroup(stack, 'TrailLogs'),
+  })
+
   new SecureFunction(stack, 'Processor', {
     runtime: lambda.Runtime.NODEJS_22_X,
     handler: 'index.handler',

@@ -6,13 +6,13 @@ Practice text is taken verbatim from NIST SP 800-171 Rev 2, the revision CMMC Le
 pinned to by 32 CFR Part 170. Every claim below states what it evidences **and what it does
 not** - no practice here is satisfied by infrastructure configuration alone.
 
-**11 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
+**13 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
 
 | Domain                                    | Addressed | Total   |
 | ----------------------------------------- | --------- | ------- |
 | AC - Access Control                       | 1         | 22      |
 | AT - Awareness and Training               | 0         | 3       |
-| AU - Audit and Accountability             | 2         | 9       |
+| AU - Audit and Accountability             | 3         | 9       |
 | CM - Configuration Management             | 1         | 9       |
 | IA - Identification and Authentication    | 2         | 11      |
 | IR - Incident Response                    | 0         | 3       |
@@ -23,8 +23,8 @@ not** - no practice here is satisfied by infrastructure configuration alone.
 | RA - Risk Assessment                      | 0         | 3       |
 | CA - Security Assessment                  | 0         | 4       |
 | SC - System and Communications Protection | 4         | 16      |
-| SI - System and Information Integrity     | 0         | 7       |
-| **Total**                                 | **11**    | **110** |
+| SI - System and Information Integrity     | 1         | 7       |
+| **Total**                                 | **13**    | **110** |
 
 ## Addressed practices
 
@@ -56,22 +56,36 @@ Reconciles with cdk-nag: `NIST.800.53.R5-S3BucketPublicReadProhibited`, `NIST.80
 | `ReferenceStack/CuiDatabase/Instance` | partial | Engine logs exported to CloudWatch Logs; Performance Insights and enhanced OS-level monitoring enabled, both encrypted with the CMK    | Produces the records. Retention, protection and review of them are properties of the log group and of process.                                                     |
 | `ReferenceStack/StandaloneDatabase`   | partial | Engine logs exported to CloudWatch Logs; Performance Insights and enhanced OS-level monitoring enabled, both encrypted with the CMK    | Produces the records. Retention, protection and review of them are properties of the log group and of process.                                                     |
 | `ReferenceStack/ApplicationLogs`      | partial | Log group retained for 1 year (default)                                                                                                | Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs.              |
+| `ReferenceStack/Alb`                  | partial | Access logs delivered to a dedicated bucket                                                                                            | Records requests reaching the load balancer. Requests handled entirely by a backend, or arriving by another path, are not captured here.                           |
+| `ReferenceStack/TrailLogs`            | partial | Log group retained for 1 year (default)                                                                                                | Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs.              |
+| `ReferenceStack/Trail`                | partial | Multi-region trail including global service events, delivered to both S3 and a named CloudWatch log group                              | Records management-plane activity. Data-plane events (S3 object access, Lambda invocations) are only captured if event selectors are configured for them.          |
 | `ReferenceStack/Processor/LogGroup`   | partial | Log group retained for 1 year (default)                                                                                                | Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs.              |
 | `ReferenceStack/Processor/Function`   | partial | Logs written to an explicit log group with a retention period, rather than one Lambda creates outside the stack; X-Ray tracing enabled | Produces invocation records and traces. Whether the function logs enough to investigate unauthorised activity is a property of its code.                           |
 
-Reconciles with cdk-nag: `NIST.800.53.R5-S3DefaultEncryptionKMS`, `NIST.800.53.R5-S3BucketLoggingEnabled`, `NIST.800.53.R5-RDSLoggingEnabled`, `NIST.800.53.R5-RDSEnhancedMonitoringEnabled`
+Reconciles with cdk-nag: `NIST.800.53.R5-S3DefaultEncryptionKMS`, `NIST.800.53.R5-S3BucketLoggingEnabled`, `NIST.800.53.R5-RDSLoggingEnabled`, `NIST.800.53.R5-RDSEnhancedMonitoringEnabled`, `NIST.800.53.R5-ELBLoggingEnabled`, `NIST.800.53.R5-CloudTrailCloudWatchLogsEnabled`
+
+### AU.L2-3.3.2 - Ensure that the actions of individual system users can be uniquely traced to those users, so they can be held accountable for their actions.
+
+**Domain:** Audit and Accountability · **NIST SP 800-171 Rev 2:** 3.3.2 · **Strongest claim:** partial
+
+| Construct              | Level   | Evidence                                                 | Not evidenced by this claim                                                                                                                     |
+| ---------------------- | ------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ReferenceStack/Trail` | partial | Every event records the IAM principal that made the call | Traces actions to an IAM principal. Tracing that principal to an individual person depends on whether roles are assumed with unique identities. |
 
 ### AU.L2-3.3.8 - Protect audit information and audit logging tools from unauthorized access, modification, and deletion.
 
 **Domain:** Audit and Accountability · **NIST SP 800-171 Rev 2:** 3.3.8 · **Strongest claim:** partial
 
-| Construct                           | Level   | Evidence                                                                                                                                              | Not evidenced by this claim                                                                                                                              |
-| ----------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ReferenceStack/ApplicationLogs`    | partial | Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region                              | Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern. |
-| `ReferenceStack/Processor`          | partial | Function logs go to a declared log group encrypted with a customer-managed key, rather than the unencrypted one Lambda would create outside the stack | Protects the records at rest. Deletion is still governed by IAM, and retention by the log group rather than by any immutable store.                      |
-| `ReferenceStack/Processor/LogGroup` | partial | Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region                              | Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern. |
+| Construct                           | Level   | Evidence                                                                                                                                                         | Not evidenced by this claim                                                                                                                                                                                |
+| ----------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ReferenceStack/ApplicationLogs`    | partial | Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region                                         | Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern.                                                   |
+| `ReferenceStack/ServiceLogs`        | partial | Log destination is encrypted at rest with SSE-S3, blocks all public access, and requires TLS; versioning is on so a delivered object cannot be silently replaced | Encryption uses AWS-managed keys, not a customer-managed key, because ELB and several other services cannot deliver logs to a KMS-encrypted bucket. Key custody for these records therefore sits with AWS. |
+| `ReferenceStack/TrailLogs`          | partial | Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region                                         | Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern.                                                   |
+| `ReferenceStack/Trail`              | partial | Log file validation enabled, producing signed digests; log files encrypted with a customer-managed key                                                           | Digest files make tampering detectable after the fact. They do not make it impossible - that needs S3 Object Lock on the destination bucket.                                                               |
+| `ReferenceStack/Processor`          | partial | Function logs go to a declared log group encrypted with a customer-managed key, rather than the unencrypted one Lambda would create outside the stack            | Protects the records at rest. Deletion is still governed by IAM, and retention by the log group rather than by any immutable store.                                                                        |
+| `ReferenceStack/Processor/LogGroup` | partial | Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region                                         | Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern.                                                   |
 
-Reconciles with cdk-nag: `NIST.800.53.R5-CloudWatchLogGroupEncrypted`
+Reconciles with cdk-nag: `NIST.800.53.R5-CloudWatchLogGroupEncrypted`, `NIST.800.53.R5-CloudTrailLogFileValidationEnabled`, `NIST.800.53.R5-CloudTrailEncryptionEnabled`
 
 ### CM.L2-3.4.1 - Establish and maintain baseline configurations and inventories of organizational systems (including hardware, software, firmware, and documentation) throughout the respective system development life cycles.
 
@@ -81,7 +95,10 @@ Reconciles with cdk-nag: `NIST.800.53.R5-CloudWatchLogGroupEncrypted`
 | ------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ReferenceStack/CuiDatabase/Instance` | supporting | AutoMinorVersionUpgrade=true and DeletionProtection=true, so the instance stays patched and cannot be removed by an unreviewed stack change | Baseline configuration of this one resource. Says nothing about the inventory or change control process the practice actually asks for.                               |
 | `ReferenceStack/StandaloneDatabase`   | supporting | AutoMinorVersionUpgrade=true and DeletionProtection=true, so the instance stays patched and cannot be removed by an unreviewed stack change | Baseline configuration of this one resource. Says nothing about the inventory or change control process the practice actually asks for.                               |
+| `ReferenceStack/Alb`                  | supporting | Deletion protection enabled                                                                                                                 | Prevents accidental removal of a component in the boundary. Says nothing about the wider configuration baseline.                                                      |
 | `ReferenceStack/Processor/Function`   | supporting | Log group is a declared resource, so it appears in the deployed inventory                                                                   | A function whose log group is implicit is invisible to any inventory built from CloudFormation. Declaring it is a precondition for a baseline, not a baseline itself. |
+
+Reconciles with cdk-nag: `NIST.800.53.R5-ELBDeletionProtectionEnabled`
 
 ### IA.L2-3.5.3 - Use multifactor authentication for local and network access to privileged accounts and for network access to non-privileged accounts.[24] [25].
 
@@ -180,15 +197,26 @@ Reconciles with cdk-nag: `NIST.800.53.R5-KMSBackingKeyRotationEnabled`
 | `ReferenceStack/WorkQueue`                 | partial    | Server-side encryption with a customer-managed KMS key                                            | Covers messages at rest in the queue. Says nothing about how producers or consumers handle the payload.                                                         |
 | `ReferenceStack/Notifications`             | partial    | Server-side encryption with a customer-managed KMS key                                            | Covers messages held by SNS. Once delivered to a subscriber, protection is that subscriber’s concern.                                                           |
 | `ReferenceStack/Records`                   | partial    | Encrypted at rest with a customer-managed KMS key                                                 | Covers the table, its indexes and its streams. Exports to S3 are encrypted by the destination bucket, not by this setting.                                      |
+| `ReferenceStack/TrailLogs`                 | supporting | KmsKeyId set to a customer-managed key                                                            | Applies to log data only, and only to records written after the key was attached.                                                                               |
 | `ReferenceStack/Processor/LogGroup`        | supporting | KmsKeyId set to a customer-managed key                                                            | Applies to log data only, and only to records written after the key was attached.                                                                               |
 | `ReferenceStack/Processor/DeadLetterQueue` | partial    | Server-side encryption with a customer-managed KMS key                                            | Covers messages at rest in the queue. Says nothing about how producers or consumers handle the payload.                                                         |
 | `ReferenceStack/Processor/Function`        | partial    | Environment variables encrypted with a customer-managed KMS key                                   | Covers configuration held on the function. Does not cover data the function reads or writes at runtime, nor the deployment package itself.                      |
 
 Reconciles with cdk-nag: `NIST.800.53.R5-EFSEncrypted`, `NIST.800.53.R5-S3DefaultEncryptionKMS`, `NIST.800.53.R5-RDSStorageEncrypted`, `NIST.800.53.R5-KMSBackingKeyRotationEnabled`, `NIST.800.53.R5-CloudWatchLogGroupEncrypted`, `NIST.800.53.R5-SecretsManagerUsingKMSKey`, `NIST.800.53.R5-SQSQueueSSE`, `NIST.800.53.R5-SNSEncryptedKMS`
 
+### SI.L2-3.14.1 - Identify, report, and correct system flaws in a timely manner.
+
+**Domain:** System and Information Integrity · **NIST SP 800-171 Rev 2:** 3.14.1 · **Strongest claim:** supporting
+
+| Construct            | Level      | Evidence                                                                                                                   | Not evidenced by this claim                                                                                                    |
+| -------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `ReferenceStack/Alb` | supporting | routing.http.drop_invalid_header_fields.enabled=true, so malformed headers are rejected rather than forwarded to a backend | Closes one class of request smuggling. Identifying and correcting flaws generally is a process, not a load balancer attribute. |
+
+Reconciles with cdk-nag: `NIST.800.53.R5-ALBHttpDropInvalidHeaderEnabled`
+
 ## Not addressed
 
-99 of 110 practices have no claim against them.
+97 of 110 practices have no claim against them.
 Most are organizational rather than technical - policy, training, personnel screening - and
 are not the sort of thing infrastructure code can evidence. Some are simply not covered yet.
 
@@ -218,7 +246,6 @@ are not the sort of thing infrastructure code can evidence. Some are simply not 
 | AT.L2-3.2.1   | Ensure that managers, systems administrators, and users of organizational systems are made aware of the security risks associated with their activities and of the applicable policies, standards, and procedures related to the security of those systems.                   |
 | AT.L2-3.2.2   | Ensure that personnel are trained to carry out their assigned information security-related duties and responsibilities.                                                                                                                                                       |
 | AT.L2-3.2.3   | Provide security awareness training on recognizing and reporting potential indicators of insider threat.                                                                                                                                                                      |
-| AU.L2-3.3.2   | Ensure that the actions of individual system users can be uniquely traced to those users, so they can be held accountable for their actions.                                                                                                                                  |
 | AU.L2-3.3.3   | Review and update logged events.                                                                                                                                                                                                                                              |
 | AU.L2-3.3.4   | Alert in the event of an audit logging process failure.                                                                                                                                                                                                                       |
 | AU.L2-3.3.5   | Correlate audit record review, analysis, and reporting processes for investigation and response to indications of unlawful, unauthorized, suspicious, or unusual activity.                                                                                                    |
@@ -286,7 +313,6 @@ are not the sort of thing infrastructure code can evidence. Some are simply not 
 | SC.L2-3.13.13 | Control and monitor the use of mobile code.                                                                                                                                                                                                                                   |
 | SC.L2-3.13.14 | Control and monitor the use of Voice over Internet Protocol (VoIP) technologies.                                                                                                                                                                                              |
 | SC.L2-3.13.15 | Protect the authenticity of communications sessions.                                                                                                                                                                                                                          |
-| SI.L2-3.14.1  | Identify, report, and correct system flaws in a timely manner.                                                                                                                                                                                                                |
 | SI.L2-3.14.2  | Provide protection from malicious code at designated locations within organizational systems.                                                                                                                                                                                 |
 | SI.L2-3.14.3  | Monitor system security alerts and advisories and take action in response.                                                                                                                                                                                                    |
 | SI.L2-3.14.4  | Update malicious code protection mechanisms when new releases are available.                                                                                                                                                                                                  |
@@ -328,6 +354,8 @@ from their parent rather than stated on the resource.
 | `ReferenceStack/WorkQueue/Policy/Resource`                                                                                                    | AWS::SQS::QueuePolicy                       |
 | `ReferenceStack/Notifications/Policy/Resource`                                                                                                | AWS::SNS::TopicPolicy                       |
 | `ReferenceStack/Records/Resource`                                                                                                             | AWS::DynamoDB::GlobalTable                  |
+| `ReferenceStack/ServiceLogs/Bucket/Policy/Resource`                                                                                           | AWS::S3::BucketPolicy                       |
+| `ReferenceStack/Trail/LogsRole/DefaultPolicy/Resource`                                                                                        | AWS::IAM::Policy                            |
 | `ReferenceStack/Processor/DeadLetterQueue/Policy/Resource`                                                                                    | AWS::SQS::QueuePolicy                       |
 | `ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource`                                                                        | AWS::IAM::Policy                            |
 
@@ -336,12 +364,15 @@ from their parent rather than stated on the resource.
 | Rule                                           | Resources                                                                                                                                                                                                                                                                              |
 | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NIST.800.53.R5-EFSInBackupPlan`               | `ReferenceStack/StandaloneFileSystem/Resource`                                                                                                                                                                                                                                         |
-| `NIST.800.53.R5-S3BucketReplicationEnabled`    | `ReferenceStack/CuiBucket/AccessLogs/Resource`, `ReferenceStack/CuiBucket/Bucket/Resource`, `ReferenceStack/StandaloneBucket/Resource`                                                                                                                                                 |
+| `NIST.800.53.R5-S3BucketReplicationEnabled`    | `ReferenceStack/CuiBucket/AccessLogs/Resource`, `ReferenceStack/CuiBucket/Bucket/Resource`, `ReferenceStack/StandaloneBucket/Resource`, `ReferenceStack/ServiceLogs/Bucket/Resource`                                                                                                   |
 | `NIST.800.53.R5-EC2RestrictedCommonPorts`      | `ReferenceStack/CuiDatabase/SecurityGroup/from ReferenceStackCuiDatabaseInstanceRotationSingleUserSecurityGroupA866EE31:{IndirectPort}`, `ReferenceStack/StandaloneDatabase/SecurityGroup/from ReferenceStackStandaloneDatabaseRotationSingleUserSecurityGroup152FEEBA:{IndirectPort}` |
 | `NIST.800.53.R5-EC2RestrictedSSH`              | `ReferenceStack/CuiDatabase/SecurityGroup/from ReferenceStackCuiDatabaseInstanceRotationSingleUserSecurityGroupA866EE31:{IndirectPort}`, `ReferenceStack/StandaloneDatabase/SecurityGroup/from ReferenceStackStandaloneDatabaseRotationSingleUserSecurityGroup152FEEBA:{IndirectPort}` |
 | `NIST.800.53.R5-RDSInBackupPlan`               | `ReferenceStack/StandaloneDatabase/Resource`                                                                                                                                                                                                                                           |
 | `NIST.800.53.R5-RDSMultiAZSupport`             | `ReferenceStack/StandaloneDatabase/Resource`                                                                                                                                                                                                                                           |
 | `NIST.800.53.R5-SecretsManagerRotationEnabled` | `ReferenceStack/ApiCredential/Resource`                                                                                                                                                                                                                                                |
-| `NIST.800.53.R5-IAMNoInlinePolicy`             | `ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource`                                                                                                                                                                                                                 |
+| `NIST.800.53.R5-S3BucketLoggingEnabled`        | `ReferenceStack/ServiceLogs/Bucket/Resource`                                                                                                                                                                                                                                           |
+| `NIST.800.53.R5-S3DefaultEncryptionKMS`        | `ReferenceStack/ServiceLogs/Bucket/Resource`                                                                                                                                                                                                                                           |
+| `NIST.800.53.R5-ALBWAFEnabled`                 | `ReferenceStack/Alb/Resource`                                                                                                                                                                                                                                                          |
+| `NIST.800.53.R5-IAMNoInlinePolicy`             | `ReferenceStack/Trail/LogsRole/DefaultPolicy/Resource`, `ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource`                                                                                                                                                         |
 | `NIST.800.53.R5-LambdaConcurrency`             | `ReferenceStack/Processor/Function/Resource`                                                                                                                                                                                                                                           |
 | `NIST.800.53.R5-LambdaInsideVPC`               | `ReferenceStack/Processor/Function/Resource`                                                                                                                                                                                                                                           |

@@ -3,21 +3,15 @@ import type * as kms from 'aws-cdk-lib/aws-kms'
 import * as s3 from 'aws-cdk-lib/aws-s3'
 import { type Construct } from 'constructs'
 
-import { addControlClaims, type NonDestructiveRemovalPolicy } from '../../index.js'
+import {
+  addControlClaims,
+  type BucketReference,
+  type NonDestructiveRemovalPolicy,
+} from '../../index.js'
 import { cmmc2Claim } from '../index.js'
 import { resolveEncryptionKey } from '../stack.js'
 
-/**
- * A bucket reference, accepting either the interface or the concrete class.
- *
- * aws-cdk-lib declares Bucket.isWebsite optional but IBucket.isWebsite
- * required, so a Bucket is not assignable to an IBucket under
- * exactOptionalPropertyTypes - which would make every caller with that flag on
- * write a cast. A Bucket is an IBucket; the friction is absorbed here instead.
- */
-export type BucketReference = s3.IBucket | s3.Bucket
-
-export { type NonDestructiveRemovalPolicy } from '../../index.js'
+export { type BucketReference, type NonDestructiveRemovalPolicy } from '../../index.js'
 
 /**
  * Props this wrapper takes ownership of, and therefore removes from the
