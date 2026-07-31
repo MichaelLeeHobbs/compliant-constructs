@@ -5,6 +5,17 @@ import { type Construct } from 'constructs'
 
 import { addControlClaims, type NonDestructiveRemovalPolicy } from '../../index.js'
 import { cmmc2Claim } from '../index.js'
+import { resolveEncryptionKey } from '../stack.js'
+
+/**
+ * A bucket reference, accepting either the interface or the concrete class.
+ *
+ * aws-cdk-lib declares Bucket.isWebsite optional but IBucket.isWebsite
+ * required, so a Bucket is not assignable to an IBucket under
+ * exactOptionalPropertyTypes - which would make every caller with that flag on
+ * write a cast. A Bucket is an IBucket; the friction is absorbed here instead.
+ */
+export type BucketReference = s3.IBucket | s3.Bucket
 
 export { type NonDestructiveRemovalPolicy } from '../../index.js'
 
@@ -36,7 +47,7 @@ export interface BucketProps extends Omit<s3.BucketProps, MandatedProps> {
    * leaves key custody entirely with AWS, which is weak evidence for
    * SC.L2-3.13.16 and is what cdk-nag's S3DefaultEncryptionKMS objects to.
    */
-  readonly encryptionKey: kms.IKey
+  readonly encryptionKey?: kms.IKey
 
   /**
    * Bucket receiving server access logs. Required.
@@ -44,7 +55,7 @@ export interface BucketProps extends Omit<s3.BucketProps, MandatedProps> {
    * Access logs are the only record of who read an object. Without them
    * AU.L2-3.3.1 has nothing to point at for this bucket.
    */
-  readonly serverAccessLogsBucket: s3.IBucket
+  readonly serverAccessLogsBucket: BucketReference
 
   /** Defaults to `RETAIN`. `DESTROY` and `SNAPSHOT` are not representable. */
   readonly removalPolicy?: NonDestructiveRemovalPolicy
@@ -72,12 +83,12 @@ export class Bucket extends s3.Bucket {
     super(scope, id, {
       ...props,
       encryption: s3.BucketEncryption.KMS,
-      encryptionKey: props.encryptionKey,
+      encryptionKey: resolveEncryptionKey(scope, props.encryptionKey),
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       enforceSSL: true,
       versioned: true,
       objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,
-      serverAccessLogsBucket: props.serverAccessLogsBucket,
+      serverAccessLogsBucket: props.serverAccessLogsBucket as s3.IBucket,
       removalPolicy: props.removalPolicy ?? RemovalPolicy.RETAIN,
     })
 

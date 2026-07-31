@@ -7,6 +7,7 @@ import { type Construct } from 'constructs'
 
 import { addControlClaims, type NonDestructiveRemovalPolicy } from '../../index.js'
 import { cmmc2Claim } from '../index.js'
+import { resolveEncryptionKey } from '../stack.js'
 
 /**
  * Props this wrapper takes ownership of, and therefore removes from the
@@ -39,7 +40,7 @@ export interface FileSystemProps extends Omit<efs.FileSystemProps, MandatedProps
    * AWS-managed key leaves key custody with AWS, which is weaker evidence for
    * SC.L2-3.13.16 than a key whose policy and rotation you control.
    */
-  readonly kmsKey: kms.IKey
+  readonly kmsKey?: kms.IKey
 
   /**
    * Subnets for the mount targets. Required, and must not be public.
@@ -78,10 +79,12 @@ export class FileSystem extends efs.FileSystem {
   constructor(scope: Construct, id: string, props: FileSystemProps) {
     assertSubnetsAreNotPublic(props.vpc, props.vpcSubnets)
 
+    const kmsKey = resolveEncryptionKey(scope, props.kmsKey)
+
     super(scope, id, {
       ...props,
       encrypted: true,
-      kmsKey: props.kmsKey,
+      kmsKey,
       allowAnonymousAccess: false,
       enableAutomaticBackups: true,
       removalPolicy: props.removalPolicy ?? RemovalPolicy.RETAIN,

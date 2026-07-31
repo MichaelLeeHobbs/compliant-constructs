@@ -1941,10 +1941,6 @@
   ],
   "untaggable": [
     {
-      "path": "ReferenceStack/CuiStorage/Key/Alias/Resource",
-      "cfnType": "AWS::KMS::Alias"
-    },
-    {
       "path": "ReferenceStack/CuiStorage/FileSystem/EfsMountTarget1",
       "cfnType": "AWS::EFS::MountTarget"
     },

@@ -58,4 +58,9 @@ export function cmmc2Claim(props: Cmmc2ClaimProps): ControlClaim {
   }
 }
 
-export { CompliantStack, type CompliantStackProps } from './stack.js'
+export {
+  CompliantStack,
+  DEFAULT_ENCRYPTION_KEY_ID,
+  resolveEncryptionKey,
+  type CompliantStackProps,
+} from './stack.js'

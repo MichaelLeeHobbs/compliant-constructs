@@ -2,12 +2,13 @@ import { RemovalPolicy } from 'aws-cdk-lib'
 import * as backup from 'aws-cdk-lib/aws-backup'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import type * as efs from 'aws-cdk-lib/aws-efs'
-import * as kms from 'aws-cdk-lib/aws-kms'
+import type * as kms from 'aws-cdk-lib/aws-kms'
 import { Construct } from 'constructs'
 
 import { addControlClaims, type NonDestructiveRemovalPolicy } from '../../index.js'
 import { FileSystem } from '../aws-efs/index.js'
 import { cmmc2Claim } from '../index.js'
+import { resolveEncryptionKey } from '../stack.js'
 
 export interface EncryptedFileSystemProps {
   readonly vpc: ec2.IVpc
@@ -15,8 +16,16 @@ export interface EncryptedFileSystemProps {
   /** Subnets for the mount targets. Must not be public. */
   readonly vpcSubnets: ec2.SubnetSelection
 
-  /** Name for the file system and the basis for the KMS alias. Must be lowercase. */
+  /** Name for the file system. Must be lowercase. */
   readonly fileSystemName: string
+
+  /**
+   * Key for the file system and its backup vault.
+   *
+   * Defaults to the stack's key. Pass one to give this file system a key with
+   * its own lifetime.
+   */
+  readonly encryptionKey?: kms.IKey
 
   /** Defaults to `RETAIN`. */
   readonly removalPolicy?: NonDestructiveRemovalPolicy
@@ -52,7 +61,7 @@ export interface EncryptedFileSystemProps {
  */
 export class EncryptedFileSystem extends Construct {
   readonly fileSystem: FileSystem
-  readonly kmsKey: kms.Key
+  readonly encryptionKey: kms.IKey
   readonly securityGroup: ec2.SecurityGroup
   readonly backupPlan: backup.BackupPlan
   readonly accessPoint?: efs.AccessPoint
@@ -66,12 +75,11 @@ export class EncryptedFileSystem extends Construct {
 
     const removalPolicy = props.removalPolicy ?? RemovalPolicy.RETAIN
 
-    this.kmsKey = new kms.Key(this, 'Key', {
-      description: `CUI encryption key for EFS ${props.fileSystemName}`,
-      enableKeyRotation: true,
-      removalPolicy,
-    })
-    this.kmsKey.addAlias(`alias/${props.fileSystemName}-efs`)
+    // Defaults to the stack key rather than minting one per file system: the
+    // point of a stack-scoped key is that the cryptographic boundary matches
+    // the assessment boundary, and a pattern quietly creating its own would
+    // undo that.
+    this.encryptionKey = resolveEncryptionKey(scope, props.encryptionKey)
 
     // Default-deny egress. The CDK's default is allowAllOutbound: true, which
     // is the opposite of what SC.L2-3.13.6 asks for.
@@ -86,7 +94,7 @@ export class EncryptedFileSystem extends Construct {
       vpcSubnets: props.vpcSubnets,
       securityGroup: this.securityGroup,
       fileSystemName: props.fileSystemName,
-      kmsKey: this.kmsKey,
+      kmsKey: this.encryptionKey,
       removalPolicy,
     })
 
@@ -134,7 +142,7 @@ export class EncryptedFileSystem extends Construct {
   private createBackupPlan(name: string, removalPolicy: RemovalPolicy): backup.BackupPlan {
     const vault = new backup.BackupVault(this, 'BackupVault', {
       backupVaultName: `${name}-efs-vault`,
-      encryptionKey: this.kmsKey,
+      encryptionKey: this.encryptionKey,
       removalPolicy,
     })
 

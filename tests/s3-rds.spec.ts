@@ -12,12 +12,6 @@ import { DatabaseInstance } from '../src/cmmc2/aws-rds/index.js'
 import { EncryptedDatabaseInstance, SecureBucket } from '../src/cmmc2/patterns/index.js'
 import { testStack } from './helpers/fixtures.js'
 
-/**
- * aws-cdk-lib declares Bucket.isWebsite optional but IBucket.isWebsite required,
- * which only conflicts under exactOptionalPropertyTypes. A Bucket is an IBucket.
- */
-const asIBucket = (b: s3.Bucket): s3.IBucket => b as s3.IBucket
-
 const POSTGRES = rds.DatabaseInstanceEngine.postgres({
   version: rds.PostgresEngineVersion.VER_16_4,
 })
@@ -29,7 +23,7 @@ function bucketSubject() {
   const logs = new s3.Bucket(stack, 'Logs', { encryption: s3.BucketEncryption.KMS, encryptionKey })
   const bucket = new Bucket(stack, 'Data', {
     encryptionKey,
-    serverAccessLogsBucket: asIBucket(logs),
+    serverAccessLogsBucket: logs,
     serverAccessLogsPrefix: 'data/',
   })
   return { stack, bucket, encryptionKey }
@@ -129,7 +123,7 @@ describe('Bucket synthesized properties', () => {
       () =>
         new Bucket(stack, 'Other', {
           encryptionKey,
-          serverAccessLogsBucket: bucket as s3.IBucket,
+          serverAccessLogsBucket: bucket,
         })
     ).toThrow(/objectOwnership must be set to "ObjectWriter"/)
   })
@@ -308,7 +302,7 @@ describe('pattern composition', () => {
     const shared = new s3.Bucket(stack, 'SharedLogs')
     new SecureBucket(stack, 'Cui', {
       bucketName: 'vanguard-cui',
-      serverAccessLogsBucket: asIBucket(shared),
+      serverAccessLogsBucket: shared,
     })
 
     // The shared bucket plus the data bucket, and no third one created here.

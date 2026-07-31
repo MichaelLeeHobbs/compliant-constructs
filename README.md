@@ -9,11 +9,12 @@ compliant configuration is the default and the non-compliant one is unrepresenta
 ```ts
 import * as efs from '@ubercode/compliant-constructs/cmmc2/aws-efs'
 
-// `kmsKey` and `vpcSubnets` are required, where the CDK makes them optional.
-// `encrypted`, `allowAnonymousAccess`, `enableAutomaticBackups` and
-// `fileSystemPolicy` cannot be set at all - the construct owns them.
+// `vpcSubnets` is required, where the CDK makes it optional - and must not be
+// public. `encrypted`, `allowAnonymousAccess`, `enableAutomaticBackups` and
+// `fileSystemPolicy` cannot be set at all: the construct owns them.
 // `removalPolicy` accepts only RETAIN or RETAIN_ON_UPDATE_OR_DELETE.
-const fs = new efs.FileSystem(this, 'Data', { vpc, vpcSubnets, kmsKey })
+// The encryption key defaults to the stack's - see below.
+const fs = new efs.FileSystem(this, 'Data', { vpc, vpcSubnets })
 ```
 
 Or take the whole compliant arrangement, which adds the pieces a file system cannot provide for
@@ -118,6 +119,34 @@ suppressed - so a future cdk-nag rule fails the build here instead of surfacing 
 
 The RDS pair is worth dwelling on. We could clear those two findings by defaulting credential
 rotation off - and that would trade a real control for a cosmetic one, so it is not on offer.
+
+## Encryption keys
+
+Every construct here encrypts with a customer-managed key. That key is **stack-scoped by default**,
+created lazily on first use and shared by everything in the stack that does not bring its own:
+
+```ts
+const stack = new CompliantStack(app, 'Storage', {
+  requiredTags: { project: 'vanguard', owner: 'platform', environment: 'prod', containsCui: true },
+  encryptionKey: existingKey, // optional - created here if omitted
+})
+
+new efs.FileSystem(stack, 'Data', { vpc, vpcSubnets }) // uses the stack key
+new s3.Bucket(stack, 'Shared', { encryptionKey: ownKey, serverAccessLogsBucket }) // overrides it
+```
+
+The reasoning is that the cryptographic boundary then lines up with the assessment boundary the
+`containsCui` tag already draws. "Everything encrypted by this key is in this scope" is a far easier
+statement to evidence than reconciling dozens of keys against a resource inventory. It also means
+adopting a wrapper costs nothing extra: one key per stack rather than one per resource.
+
+The trade-off is blast radius. One key per stack means a compromise, an accidental deletion or a
+key-policy mistake reaches everything in it, and the policy cannot be scoped with `kms:ViaService`
+as tightly as a single-purpose key allows. The per-resource override is the answer wherever that
+matters - a bucket shared with an outside party, or data with its own revocation lifetime.
+
+Using a compliant construct inside a plain `cdk.Stack` **throws**, naming the construct and both
+remedies. Silently inventing a key would quietly undo the guarantee that made it mandatory.
 
 ## Modules
 

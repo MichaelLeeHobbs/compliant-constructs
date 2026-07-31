@@ -1,13 +1,14 @@
 import { RemovalPolicy } from 'aws-cdk-lib'
 import * as backup from 'aws-cdk-lib/aws-backup'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
-import * as kms from 'aws-cdk-lib/aws-kms'
+import type * as kms from 'aws-cdk-lib/aws-kms'
 import type * as rds from 'aws-cdk-lib/aws-rds'
 import { Construct } from 'constructs'
 
 import { addControlClaims, type SnapshottableRemovalPolicy } from '../../index.js'
 import { DatabaseInstance } from '../aws-rds/index.js'
 import { cmmc2Claim } from '../index.js'
+import { resolveEncryptionKey } from '../stack.js'
 
 export interface EncryptedDatabaseInstanceProps {
   readonly vpc: ec2.IVpc
@@ -23,6 +24,12 @@ export interface EncryptedDatabaseInstanceProps {
 
   /** Master username. Credentials are always a generated, CMK-encrypted secret. */
   readonly masterUsername?: string
+
+  /**
+   * Key for storage, the credential secret, Performance Insights and the
+   * backup vault. Defaults to the stack key.
+   */
+  readonly encryptionKey?: kms.IKey
 
   /** Defaults to `RETAIN`. */
   readonly removalPolicy?: SnapshottableRemovalPolicy
@@ -46,7 +53,7 @@ export interface EncryptedDatabaseInstanceProps {
  */
 export class EncryptedDatabaseInstance extends Construct {
   readonly instance: DatabaseInstance
-  readonly kmsKey: kms.Key
+  readonly encryptionKey: kms.IKey
   readonly securityGroup: ec2.SecurityGroup
   readonly backupPlan: backup.BackupPlan
 
@@ -59,11 +66,7 @@ export class EncryptedDatabaseInstance extends Construct {
 
     const removalPolicy = props.removalPolicy ?? RemovalPolicy.RETAIN
 
-    this.kmsKey = new kms.Key(this, 'Key', {
-      description: `CUI encryption key for database ${props.databaseName}`,
-      enableKeyRotation: true,
-      removalPolicy,
-    })
+    this.encryptionKey = resolveEncryptionKey(scope, props.encryptionKey)
 
     this.securityGroup = new ec2.SecurityGroup(this, 'SecurityGroup', {
       vpc: props.vpc,
@@ -78,7 +81,7 @@ export class EncryptedDatabaseInstance extends Construct {
       engine: props.engine,
       instanceType: props.instanceType,
       databaseName: props.databaseName,
-      encryptionKey: this.kmsKey,
+      encryptionKey: this.encryptionKey,
       masterUsername: props.masterUsername ?? 'dbadmin',
       multiAz: true,
       removalPolicy,
@@ -124,7 +127,7 @@ export class EncryptedDatabaseInstance extends Construct {
   private createBackupPlan(name: string, removalPolicy: RemovalPolicy): backup.BackupPlan {
     const vault = new backup.BackupVault(this, 'BackupVault', {
       backupVaultName: `${name}-db-vault`,
-      encryptionKey: this.kmsKey,
+      encryptionKey: this.encryptionKey,
       removalPolicy,
     })
 

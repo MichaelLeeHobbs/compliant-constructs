@@ -258,7 +258,6 @@ from their parent rather than stated on the resource.
 
 | Construct                                                                                                                                     | Type                                        |
 | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `ReferenceStack/CuiStorage/Key/Alias/Resource`                                                                                                | AWS::KMS::Alias                             |
 | `ReferenceStack/CuiStorage/FileSystem/EfsMountTarget1`                                                                                        | AWS::EFS::MountTarget                       |
 | `ReferenceStack/CuiStorage/FileSystem/EfsMountTarget2`                                                                                        | AWS::EFS::MountTarget                       |
 | `ReferenceStack/CuiStorage/BackupVault/Resource`                                                                                              | AWS::Backup::BackupVault                    |
