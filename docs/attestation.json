@@ -117,6 +117,21 @@
             ],
             "caveat": "Prevents exposure to the internet. Access from within the VPC is governed by the security groups the caller supplies."
           }
+        },
+        {
+          "path": "ReferenceStack/ServiceSecurityGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.3",
+            "satisfaction": "supporting",
+            "evidence": "Remote administration ports cannot be opened to the internet through this construct",
+            "nagRuleIds": [
+              "NIST.800.53.R5-EC2RestrictedSSH",
+              "NIST.800.53.R5-EC2RestrictedCommonPorts"
+            ],
+            "caveat": "Blocks the specific mistake of exposing SSH or RDP to 0.0.0.0/0. Flow control for CUI depends on the whole rule set, not on one prohibited case."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -490,6 +505,17 @@
             ],
             "caveat": "Produces the records. Retention, protection and review of them are properties of the log group and of process."
           }
+        },
+        {
+          "path": "ReferenceStack/ApplicationLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Log group retained for 1 year (default)",
+            "caveat": "Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -583,7 +609,23 @@
         "nist800171": "3.3.8",
         "title": "Protect audit information and audit logging tools from unauthorized access, modification, and deletion."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/ApplicationLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.8",
+            "satisfaction": "partial",
+            "evidence": "Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -891,7 +933,34 @@
         "nist800171": "3.5.10",
         "title": "Store and transmit only cryptographically-protected passwords."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/ApiCredential",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "IA.L2-3.5.10",
+            "satisfaction": "supporting",
+            "evidence": "Credential stored encrypted rather than in configuration or source",
+            "caveat": "No rotation is configured. Storing a credential encrypted is weaker evidence than rotating it - attach a rotation schedule where the consumer allows one."
+          }
+        },
+        {
+          "path": "ReferenceStack/RotatedCredential",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "IA.L2-3.5.10",
+            "satisfaction": "partial",
+            "evidence": "Credential stored encrypted, on an automatic rotation schedule",
+            "nagRuleIds": [
+              "NIST.800.53.R5-SecretsManagerRotationEnabled"
+            ],
+            "caveat": "Rotation is scheduled. Whether consumers pick up the new value without downtime depends on how they read the secret."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -1529,6 +1598,17 @@
             "evidence": "Database security group created with allowAllOutbound=false",
             "caveat": "Deny-by-default at this security group only. Ingress rules added by the caller are out of scope."
           }
+        },
+        {
+          "path": "ReferenceStack/ServiceSecurityGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.6",
+            "satisfaction": "partial",
+            "evidence": "Created with allowAllOutbound=false and allowAllIpv6Outbound=false",
+            "caveat": "Establishes deny-by-default at this security group. Rules added afterwards, network ACLs, and any other path into the subnet are outside its scope."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -1692,6 +1772,17 @@
             ],
             "caveat": "FIPS validation depends on the region and endpoints in use, which this construct does not control."
           }
+        },
+        {
+          "path": "ReferenceStack/DedicatedKey",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.11",
+            "satisfaction": "supporting",
+            "evidence": "Encryption performed by AWS KMS",
+            "caveat": "Whether the cryptography is FIPS-validated depends on the region and the endpoints in use, neither of which this construct controls."
+          }
         }
       ],
       "satisfaction": "supporting"
@@ -1842,6 +1933,62 @@
               "NIST.800.53.R5-RDSStorageEncrypted"
             ],
             "caveat": "Covers storage at rest. Does not evidence encryption of data exported from the database, nor key custody procedures."
+          }
+        },
+        {
+          "path": "ReferenceStack/DedicatedKey",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "supporting",
+            "evidence": "Customer-managed key under this account, with automatic annual rotation enabled",
+            "nagRuleIds": [
+              "NIST.800.53.R5-KMSBackingKeyRotationEnabled"
+            ],
+            "caveat": "A key protects nothing on its own. What it evidences is that the resources encrypted with it are under key material you control and rotate."
+          }
+        },
+        {
+          "path": "ReferenceStack/ApplicationLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "supporting",
+            "evidence": "KmsKeyId set to a customer-managed key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Applies to log data only, and only to records written after the key was attached."
+          }
+        },
+        {
+          "path": "ReferenceStack/ApiCredential",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "Encrypted at rest with a customer-managed KMS key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-SecretsManagerUsingKMSKey"
+            ],
+            "caveat": "Protects the stored value. Says nothing about how the secret is handled once a consumer has retrieved it."
+          }
+        },
+        {
+          "path": "ReferenceStack/RotatedCredential",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "Encrypted at rest with a customer-managed KMS key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-SecretsManagerUsingKMSKey"
+            ],
+            "caveat": "Protects the stored value. Says nothing about how the secret is handled once a consumer has retrieved it."
           }
         }
       ],
@@ -2023,6 +2170,14 @@
     {
       "path": "ReferenceStack/StandaloneDatabase/Secret/Attachment/Policy/Resource",
       "cfnType": "AWS::SecretsManager::ResourcePolicy"
+    },
+    {
+      "path": "ReferenceStack/RotatedCredential/RotationSchedule/Resource",
+      "cfnType": "AWS::SecretsManager::RotationSchedule"
+    },
+    {
+      "path": "ReferenceStack/RotatedCredential/Policy/Resource",
+      "cfnType": "AWS::SecretsManager::ResourcePolicy"
     }
   ],
   "violations": [
@@ -2070,6 +2225,13 @@
       "description": "The RDS DB Instance does not have multi-AZ support - (Control IDs: CP-1a.1(b), CP-1a.2, CP-2a, CP-2a.6, CP-2a.7, CP-2d, CP-2e, CP-2(5), CP-2(6), CP-6(2), CP-10, SC-5(2), SC-6, SC-22, SC-36, SI-13(5)). Multi-AZ support in Amazon Relational Database Service (Amazon RDS) provides enhanced availability and durability for database instances. When you provision a Multi-AZ database instance, Amazon RDS automatically creates a primary database instance, and synchronously replicates the data to a standby instance in a different Availability Zone. In case of an infrastructure failure, Amazon RDS performs an automatic failover to the standby so that you can resume database operations as soon as the failover is complete.",
       "resources": [
         "ReferenceStack/StandaloneDatabase/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-SecretsManagerRotationEnabled",
+      "description": "The secret does not have automatic rotation scheduled - (Control IDs: AC-4, AC-4(22), AC-24(1), AU-9(3), CA-9b, PM-17b, SC-7(4)(b), SC-7(4)(g), SC-8, SC-8(1), SC-8(2), SC-8(3), SC-8(4), SC-8(5), SC-13a, SC-23, SI-1a.2, SI-1a.2, SI-1c.2). Rotating secrets on a regular schedule can shorten the period a secret is active, and potentially reduce the business impact if the secret is compromised.",
+      "resources": [
+        "ReferenceStack/ApiCredential/Resource"
       ]
     }
   ]

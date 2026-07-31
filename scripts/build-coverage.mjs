@@ -24,8 +24,13 @@ const ec2 = await import('aws-cdk-lib/aws-ec2')
 const kms = await import('aws-cdk-lib/aws-kms')
 
 const rds = await import('aws-cdk-lib/aws-rds')
+const sm = await import('aws-cdk-lib/aws-secretsmanager')
 
 const { CompliantStack } = await import('../dist/cmmc2/index.mjs')
+const { SecurityGroup } = await import('../dist/cmmc2/aws-ec2/index.mjs')
+const { Key } = await import('../dist/cmmc2/aws-kms/index.mjs')
+const { LogGroup } = await import('../dist/cmmc2/aws-logs/index.mjs')
+const { Secret } = await import('../dist/cmmc2/aws-secretsmanager/index.mjs')
 const { FileSystem } = await import('../dist/cmmc2/aws-efs/index.mjs')
 const { Bucket } = await import('../dist/cmmc2/aws-s3/index.mjs')
 const { DatabaseInstance } = await import('../dist/cmmc2/aws-rds/index.mjs')
@@ -99,6 +104,17 @@ function referenceApp() {
     instanceType,
     encryptionKey: key,
     masterUsername: 'dbadmin',
+  })
+
+  new Key(stack, 'DedicatedKey')
+  new LogGroup(stack, 'ApplicationLogs')
+  new Secret(stack, 'ApiCredential')
+  new Secret(stack, 'RotatedCredential', {
+    hostedRotation: sm.HostedRotation.mysqlSingleUser(),
+  })
+  new SecurityGroup(stack, 'ServiceSecurityGroup', {
+    vpc,
+    description: 'Reference service security group',
   })
 
   return stack
