@@ -155,3 +155,5 @@ export {
   EncryptedDatabaseInstance,
   type EncryptedDatabaseInstanceProps,
 } from "./encrypted-database.js"
+
+export { SecureFunction, type SecureFunctionProps } from "./secure-function.js"

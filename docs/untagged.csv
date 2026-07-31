@@ -22,3 +22,8 @@ ReferenceStack/StandaloneDatabase/Secret/Attachment/RotationSchedule/Resource,AW
 ReferenceStack/StandaloneDatabase/Secret/Attachment/Policy/Resource,AWS::SecretsManager::ResourcePolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/RotatedCredential/RotationSchedule/Resource,AWS::SecretsManager::RotationSchedule,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/RotatedCredential/Policy/Resource,AWS::SecretsManager::ResourcePolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/WorkQueue/Policy/Resource,AWS::SQS::QueuePolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/Notifications/Policy/Resource,AWS::SNS::TopicPolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/Records/Resource,AWS::DynamoDB::GlobalTable,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/Processor/DeadLetterQueue/Policy/Resource,AWS::SQS::QueuePolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource,AWS::IAM::Policy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
