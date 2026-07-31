@@ -76,6 +76,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   invisible. Encrypts environment variables and enables tracing.
 - `cmmc2/patterns` - `SecureFunction`, creating that log group plus a dead-letter queue.
 
+- `cmmc2/aws-cloudtrail` - `Trail`, mandating multi-region coverage, global service events,
+  log file validation, KMS encryption and CloudWatch delivery, with both destinations named
+  rather than conjured.
+- `cmmc2/aws-elasticloadbalancingv2` - `ApplicationLoadBalancer`, requiring an access log
+  bucket and mandating deletion protection and invalid-header dropping.
+- `cmmc2/patterns` - `ServiceLogBucket`, an SSE-S3 destination for AWS service log delivery.
+  It is the one bucket here without a customer-managed key, because ELB cannot deliver access
+  logs to a KMS-encrypted bucket at all.
+
 ### Changed
 
 - **Encryption keys are now stack-scoped by default.** `kmsKey` / `encryptionKey` became optional on
