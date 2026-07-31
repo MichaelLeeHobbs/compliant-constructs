@@ -91,6 +91,28 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   via `addComplianceContainer()` run with a read-only root filesystem, cannot be privileged, and
   must have a log driver; services never receive a public IP.
 
+### Fixed
+
+- **`SecurityGroup` let `Port.allTraffic()` through from `0.0.0.0/0`.** That port shape emits
+  ipProtocol `-1` with no port range, and the guard read `fromPort` first and returned early -
+  so the broadest and most dangerous rule of all was the one rule it did not block. It also no
+  longer blocks `udp/22`, which was a false positive.
+- **`FargateTaskDefinition.addContainer()` bypassed every container control.** Hardening lived
+  on a separate `addComplianceContainer`, leaving the inherited method accepting
+  `privileged: true` with a writable root and no logging. The hardening now overrides
+  `addContainer`; `addComplianceContainer` is removed.
+- **`/verify` and `/report` did not resolve for consumers.** Their stub directories were not
+  in package.json `files`, so on TypeScript 5.x with the tsconfig `cdk init` generates, both
+  subpaths failed - including the one the README example imports. The stub generator now fails
+  the build if any subpath is missing from `files`.
+- The CloudWatch Logs key-policy grant deduplicated through module-level state, which is
+  per-bundle. It now records regions on the key itself via `Symbol.for`, so the dedupe holds
+  across subpath bundles instead of relying on CDK merging identical statements.
+- Evidence CSV cells beginning with `=`, `+`, `-` or `@` are prefixed so a spreadsheet treats
+  them as text. Construct paths are caller-controlled and the file exists to be opened in Excel.
+- `ServiceLogBucket` documented one outstanding finding; it has three. All are now named and
+  pinned.
+
 ### Changed
 
 - **Encryption keys are now stack-scoped by default.** `kmsKey` / `encryptionKey` became optional on

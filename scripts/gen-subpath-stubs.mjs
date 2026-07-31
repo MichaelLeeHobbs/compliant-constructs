@@ -56,3 +56,24 @@ for (const [subpath, conditions] of subpaths) {
   await writeFile(join(dir, 'package.json'), `${JSON.stringify(stub, null, 2)}\n`, 'utf8')
   console.warn(`gen-subpath-stubs: wrote ${relative(root, join(dir, 'package.json'))}`)
 }
+
+/*
+ * A stub nobody publishes is worse than no stub: the subpath silently works in
+ * development and fails for consumers. `verify/` and `report/` shipped that way
+ * because "files" listed `cmmc2/` by name, so every subpath added outside that
+ * directory was quietly excluded. Fail the build rather than let it happen
+ * again.
+ */
+const published = new Set((pkg.files ?? []).map(entry => entry.replace(/\/$/, '')))
+const missing = subpaths
+  .map(([subpath]) => subpath.replace(/^\.\//, '').split('/')[0])
+  .filter(top => !published.has(top))
+
+if (missing.length > 0) {
+  console.error(
+    `gen-subpath-stubs: these stub directories are not in package.json "files", so they would ` +
+      `not be published and the subpath would fail to resolve for anyone on classic node ` +
+      `resolution: ${[...new Set(missing)].join(', ')}`
+  )
+  process.exit(1)
+}

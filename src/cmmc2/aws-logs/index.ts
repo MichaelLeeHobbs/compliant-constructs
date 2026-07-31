@@ -101,20 +101,28 @@ function describeRetention(retention?: logs.RetentionDays): string {
 }
 
 /**
- * Keys already granted to CloudWatch Logs, per region.
+ * Regions already granted, recorded on the key itself.
  *
  * A key policy cannot carry two statements with the same sid, so the grant has
  * to happen once per key per region no matter how many log groups attach.
+ *
+ * The bookkeeping lives on the key rather than in a module-level map because
+ * this package ships one bundle per subpath with code splitting off: a
+ * `LogGroup` created from `cmmc2/aws-logs` and one created inside
+ * `cmmc2/patterns` run different copies of this module, and therefore
+ * different module-level state. `Symbol.for` resolves to the same symbol in
+ * every copy, so the dedupe holds across them - the same reason
+ * `CompliantStack.of` uses a marker instead of `instanceof`.
  */
-const granted = new WeakMap<kms.IKey, Set<string>>()
+const GRANTED_REGIONS = Symbol.for('@ubercode/compliant-constructs.logsKeyGrantRegions')
 
 function grantCloudWatchLogs(scope: Construct, key: kms.IKey): void {
   const stack = Stack.of(scope)
-  const regions = granted.get(key) ?? new Set<string>()
+  const carrier = key as unknown as Record<symbol, Set<string> | undefined>
+  const regions = (carrier[GRANTED_REGIONS] ??= new Set<string>())
 
   if (regions.has(stack.region)) return
   regions.add(stack.region)
-  granted.set(key, regions)
 
   key.addToResourcePolicy(
     new iam.PolicyStatement({

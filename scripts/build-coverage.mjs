@@ -145,7 +145,7 @@ function referenceApp() {
     cpu: 256,
     memoryLimitMiB: 512,
   })
-  taskDefinition.addComplianceContainer('app', {
+  taskDefinition.addContainer('app', {
     image: ecs.ContainerImage.fromRegistry('public.ecr.aws/nginx/nginx:latest'),
     logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'app', logGroup: taskLogs }),
   })

@@ -9,9 +9,18 @@ import {
 export const README_MARKER_START = '<!-- compliant-constructs:coverage:start -->'
 export const README_MARKER_END = '<!-- compliant-constructs:coverage:end -->'
 
-/** RFC 4180 field escaping. */
+/**
+ * RFC 4180 field escaping, plus formula-injection defence.
+ *
+ * Spreadsheet applications evaluate a cell beginning with `=`, `+`, `-`, `@`,
+ * tab or carriage return as a formula. These reports carry construct paths,
+ * which are caller-controlled strings, and the whole point of the file is that
+ * somebody opens it in Excel. Prefixing with an apostrophe makes the cell
+ * literal text; the apostrophe is not displayed.
+ */
 function csvField(value: string): string {
-  return /[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value
+  return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe
 }
 
 function csvRow(fields: readonly string[]): string {

@@ -104,7 +104,7 @@ describe('FargateTaskDefinition', () => {
     const { stack } = testStack()
     const logGroup = new LogGroup(stack, 'TaskLogs')
     const td = new FargateTaskDefinition(stack, 'Td', { cpu: 256, memoryLimitMiB: 512 })
-    td.addComplianceContainer('app', {
+    td.addContainer('app', {
       image: IMAGE,
       logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'app', logGroup }),
     })
@@ -147,7 +147,7 @@ describe('FargateService', () => {
     const logGroup = new LogGroup(stack, 'TaskLogs')
     const cluster = new Cluster(stack, 'C', { vpc })
     const td = new FargateTaskDefinition(stack, 'Td', { cpu: 256, memoryLimitMiB: 512 })
-    td.addComplianceContainer('app', {
+    td.addContainer('app', {
       image: IMAGE,
       logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'app', logGroup }),
     })
