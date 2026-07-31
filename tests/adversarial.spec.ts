@@ -1,15 +1,17 @@
+import { App, Stack } from 'aws-cdk-lib'
 import { Template } from 'aws-cdk-lib/assertions'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as ecs from 'aws-cdk-lib/aws-ecs'
 import * as s3 from 'aws-cdk-lib/aws-s3'
 
+import { verifyArchitecture } from '../src/index.js'
 import { verifyCompliance } from '../src/verify.js'
 import { buildAttestation, renderEvidenceCsv } from '../src/report/index.js'
 import { SecurityGroup } from '../src/cmmc2/aws-ec2/index.js'
 import { FargateTaskDefinition } from '../src/cmmc2/aws-ecs/index.js'
 import { LogGroup } from '../src/cmmc2/aws-logs/index.js'
 import { Bucket } from '../src/cmmc2/aws-s3/index.js'
-import { ServiceLogBucket } from '../src/cmmc2/patterns/index.js'
+import { CuiVpc, ServiceLogBucket } from '../src/cmmc2/patterns/index.js'
 import { testStack } from './helpers/fixtures.js'
 
 /**
@@ -178,5 +180,103 @@ describe('ServiceLogBucket outstanding findings are all pinned', () => {
       'NIST.800.53.R5-S3BucketReplicationEnabled',
       'NIST.800.53.R5-S3DefaultEncryptionKMS',
     ])
+  })
+})
+
+describe('architecture checks survive contact with real CDK apps', () => {
+  /**
+   * The region in an endpoint service name is a token unless the stack has an
+   * explicit env, so the resolved value is an Fn::Join rather than a string.
+   * An earlier parser matched the rendered JSON with a regex and failed on the
+   * extra bracket - which made the check fire on every environment-agnostic
+   * stack, the most common shape there is.
+   */
+  it('does not cry wolf on an environment-agnostic stack', () => {
+    const app = new App()
+    const stack = new Stack(app, 'Agnostic')
+    const vpc = new ec2.Vpc(stack, 'V', {
+      maxAzs: 1,
+      natGateways: 0,
+      subnetConfiguration: [
+        { name: 'i', subnetType: ec2.SubnetType.PRIVATE_ISOLATED, cidrMask: 24 },
+      ],
+    })
+    new ec2.InterfaceVpcEndpoint(stack, 'Kms', {
+      vpc: vpc as ec2.IVpc,
+      service: ec2.InterfaceVpcEndpointAwsService.KMS,
+    })
+
+    const result = verifyArchitecture(stack, { expectedPrivateServices: ['kms'] })
+
+    expect(result.findings.map(f => f.checkId)).toEqual([])
+  })
+
+  /**
+   * CuiVpc selects FIPS endpoints by default, so somebody following the README
+   * writes `['kms']` and gets a FIPS endpoint. Reporting that as missing would
+   * mean our own documented usage tripped our own check.
+   */
+  it('treats a FIPS endpoint as covering the service it is a variant of', () => {
+    const { stack } = testStack()
+    new CuiVpc(stack, 'Net')
+
+    const result = verifyArchitecture(stack, {
+      expectedPrivateServices: ['kms', 'sts', 'secretsmanager'],
+    })
+
+    expect(result.findings.map(f => f.checkId)).toEqual([])
+  })
+
+  it('still reports a service that genuinely has no endpoint', () => {
+    const { stack } = testStack()
+    new CuiVpc(stack, 'Net')
+
+    const result = verifyArchitecture(stack, { expectedPrivateServices: ['athena'] })
+
+    expect(result.findings.map(f => f.checkId)).toEqual(['CUI-PrivateServiceCoverage'])
+  })
+
+  it('sees an internet gateway attached after the VPC was built', () => {
+    const { stack } = testStack()
+    const cui = new CuiVpc(stack, 'Net')
+    const igw = new ec2.CfnInternetGateway(stack, 'AddedLater', {})
+    new ec2.CfnVPCGatewayAttachment(stack, 'Attach', {
+      vpcId: cui.vpc.vpcId,
+      internetGatewayId: igw.ref,
+    })
+
+    expect(verifyArchitecture(stack).findings.map(f => f.checkId)).toContain('CUI-NoInternetRoute')
+  })
+
+  it('sees ingress added through connections rather than addIngressRule', () => {
+    const { stack } = testStack()
+    const cui = new CuiVpc(stack, 'Net')
+    const sg = new ec2.SecurityGroup(stack, 'Plain', { vpc: cui.vpc as ec2.IVpc })
+    sg.connections.allowFrom(ec2.Peer.anyIpv4(), ec2.Port.tcp(3389))
+
+    expect(verifyArchitecture(stack).findings.map(f => f.checkId)).toContain(
+      'CUI-NoPublicAdminIngress'
+    )
+  })
+})
+
+describe('CuiVpc endpoint security groups', () => {
+  it('permit HTTPS and nothing else', () => {
+    const { stack } = testStack()
+    new CuiVpc(stack, 'Net')
+
+    const ingress = Object.values(
+      Template.fromStack(stack).findResources('AWS::EC2::SecurityGroup')
+    ).flatMap(
+      sg =>
+        (sg.Properties as { SecurityGroupIngress?: { IpProtocol: string; FromPort: number }[] })
+          .SecurityGroupIngress ?? []
+    )
+
+    expect(ingress.length).toBeGreaterThan(0)
+    for (const rule of ingress) {
+      expect(rule.IpProtocol).toBe('tcp')
+      expect(rule.FromPort).toBe(443)
+    }
   })
 })

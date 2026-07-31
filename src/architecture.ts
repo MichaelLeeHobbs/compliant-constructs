@@ -111,10 +111,10 @@ function checkPrivateServiceCoverage(
   if (expected.length === 0) return []
 
   const present = new Set(
-    resourcesOfType(scope, 'AWS::EC2::VPCEndpoint').map(endpointServiceSuffix)
+    resourcesOfType(scope, 'AWS::EC2::VPCEndpoint').map(e => baseService(endpointServiceSuffix(e)))
   )
 
-  const missing = expected.filter(service => !present.has(service))
+  const missing = expected.filter(service => !present.has(baseService(service)))
   if (missing.length === 0) return []
 
   return [
@@ -138,9 +138,40 @@ function checkPrivateServiceCoverage(
  */
 function endpointServiceSuffix(endpoint: CfnResource): string {
   const raw = (endpoint as unknown as { serviceName?: unknown }).serviceName
-  const rendered = JSON.stringify(Stack.of(endpoint).resolve(raw) ?? '')
-  const match = /.([a-z0-9-]+)"?]?}?"?$/.exec(rendered)
-  return match?.[1] ?? ''
+  const resolved = Stack.of(endpoint).resolve(raw) as unknown
+
+  // In an environment-agnostic stack the region is a token, so the resolved
+  // value is `{"Fn::Join":["",["com.amazonaws.",{"Ref":"AWS::Region"},".kms"]]}`
+  // rather than a plain string. Concatenating the literal fragments and taking
+  // the last dotted segment works for both shapes - an earlier version matched
+  // against the JSON with a regex and failed on the extra bracket, which made
+  // the check fire on every env-agnostic stack. A check that cries wolf is a
+  // check somebody turns off.
+  const text = typeof resolved === 'string' ? resolved : stringLiterals(resolved).join('')
+  const segments = text.split('.').filter(segment => segment !== '')
+
+  return segments[segments.length - 1] ?? ''
+}
+
+/** Every string leaf in a resolved CloudFormation value, in order. */
+function stringLiterals(value: unknown): string[] {
+  if (typeof value === 'string') return [value]
+  if (Array.isArray(value)) return value.flatMap(stringLiterals)
+  if (typeof value === 'object' && value !== null) {
+    return Object.values(value).flatMap(stringLiterals)
+  }
+  return []
+}
+
+/**
+ * `kms-fips` and `kms` are the same service reached privately.
+ *
+ * `CuiVpc` selects FIPS endpoints by default, so a caller who writes the
+ * obvious `expectedPrivateServices: ['kms']` would otherwise be told the
+ * endpoint they are looking at does not exist.
+ */
+function baseService(service: string): string {
+  return service.endsWith('-fips') ? service.slice(0, -'-fips'.length) : service
 }
 
 /**
