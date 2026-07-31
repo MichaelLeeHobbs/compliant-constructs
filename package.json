@@ -107,8 +107,8 @@
   ],
   "scripts": {
     "clean": "rimraf dist coverage cmmc2 verify report",
-    "build": "tsup && node scripts/gen-subpath-stubs.mjs",
-    "build:watch": "tsup --watch",
+    "build": "node --max-old-space-size=6144 node_modules/tsup/dist/cli-default.js && node scripts/gen-subpath-stubs.mjs",
+    "build:watch": "node --max-old-space-size=6144 node_modules/tsup/dist/cli-default.js --watch",
     "prepublishOnly": "pnpm run test && pnpm run build",
     "preversion": "pnpm run test && pnpm run build",
     "postversion": "git push && git push --tags",

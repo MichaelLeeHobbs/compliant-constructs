@@ -8,6 +8,12 @@ on:
   # parent merged and GitHub retargeted it.
   pull_request:
 
+# tsup generates .d.ts for eight entry points against aws-cdk-lib type
+# graph, which exceeds the default heap on a GitHub runner. Set at workflow
+# level so it reaches tsup DTS worker threads as well as the main process.
+env:
+  NODE_OPTIONS: --max-old-space-size=6144
+
 jobs:
   test:
     runs-on: ubuntu-latest
