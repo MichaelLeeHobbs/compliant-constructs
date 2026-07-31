@@ -1,0 +1,31 @@
+{
+  // This project compiles with TypeScript 6 and sets "ignoreDeprecations": "6.0",
+  // which TypeScript 5 rejects. VS Code uses its own bundled TypeScript for
+  // IntelliSense by default, so without this it fails to load tsconfig.base.json
+  // and reports errors that neither `pnpm run test:types` nor CI can reproduce.
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // Flat config (eslint.config.mts) rather than .eslintrc.
+  "eslint.useFlatConfig": true,
+  "eslint.validate": ["javascript", "typescript"],
+
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[markdown]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+
+  // Generated: src/cmmc2/catalog.generated.ts is emitted by scripts/build-catalog.mjs,
+  // and the root cmmc2/, verify/ and report/ directories are build-time subpath stubs.
+  "files.exclude": {
+    "cmmc2": true,
+    "verify": true,
+    "report": true
+  },
+  "search.exclude": {
+    "dist": true,
+    "coverage": true,
+    "src/cmmc2/catalog.generated.ts": true
+  },
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
+}
