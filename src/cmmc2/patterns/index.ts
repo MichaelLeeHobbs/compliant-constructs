@@ -5,8 +5,8 @@ import type * as efs from 'aws-cdk-lib/aws-efs'
 import * as kms from 'aws-cdk-lib/aws-kms'
 import { Construct } from 'constructs'
 
-import { addControlClaims } from '../../index.js'
-import { FileSystem, type NonDestructiveRemovalPolicy } from '../aws-efs/index.js'
+import { addControlClaims, type NonDestructiveRemovalPolicy } from '../../index.js'
+import { FileSystem } from '../aws-efs/index.js'
 import { cmmc2Claim } from '../index.js'
 
 export interface EncryptedFileSystemProps {
@@ -141,3 +141,9 @@ export class EncryptedFileSystem extends Construct {
     return backup.BackupPlan.daily35DayRetention(this, 'BackupPlan', vault)
   }
 }
+
+export { SecureBucket, type SecureBucketProps } from "./secure-bucket.js"
+export {
+  EncryptedDatabaseInstance,
+  type EncryptedDatabaseInstanceProps,
+} from "./encrypted-database.js"

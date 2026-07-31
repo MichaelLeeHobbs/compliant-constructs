@@ -61,9 +61,65 @@
             "evidence": "AllowAnonymousAccess=false; access mediated by mount targets in private subnets",
             "caveat": "Flow control depends primarily on the security groups and network ACLs governing the mount targets, which are supplied by the caller."
           }
+        },
+        {
+          "path": "ReferenceStack/CuiBucket/Bucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.3",
+            "satisfaction": "partial",
+            "evidence": "BlockPublicAcls, BlockPublicPolicy, IgnorePublicAcls and RestrictPublicBuckets all true; ObjectOwnership=BucketOwnerEnforced disables ACLs entirely",
+            "nagRuleIds": [
+              "NIST.800.53.R5-S3BucketPublicReadProhibited"
+            ],
+            "caveat": "Prevents public exposure. Authorised access between principals is governed by IAM and the bucket policy, which the caller supplies."
+          }
+        },
+        {
+          "path": "ReferenceStack/StandaloneBucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.3",
+            "satisfaction": "partial",
+            "evidence": "BlockPublicAcls, BlockPublicPolicy, IgnorePublicAcls and RestrictPublicBuckets all true; ObjectOwnership=BucketOwnerEnforced disables ACLs entirely",
+            "nagRuleIds": [
+              "NIST.800.53.R5-S3BucketPublicReadProhibited"
+            ],
+            "caveat": "Prevents public exposure. Authorised access between principals is governed by IAM and the bucket policy, which the caller supplies."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiDatabase/Instance",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.3",
+            "satisfaction": "partial",
+            "evidence": "PubliclyAccessible=false; reachable only from within the VPC",
+            "nagRuleIds": [
+              "NIST.800.53.R5-RDSInstancePublicAccess"
+            ],
+            "caveat": "Prevents exposure to the internet. Access from within the VPC is governed by the security groups the caller supplies."
+          }
+        },
+        {
+          "path": "ReferenceStack/StandaloneDatabase",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.3",
+            "satisfaction": "partial",
+            "evidence": "PubliclyAccessible=false; reachable only from within the VPC",
+            "nagRuleIds": [
+              "NIST.800.53.R5-RDSInstancePublicAccess"
+            ],
+            "caveat": "Prevents exposure to the internet. Access from within the VPC is governed by the security groups the caller supplies."
+          }
         }
       ],
-      "satisfaction": "supporting"
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -362,7 +418,81 @@
         "nist800171": "3.3.1",
         "title": "Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity"
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/CuiBucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Server access logs delivered to a dedicated bucket that is itself encrypted with a customer-managed key and blocks public access",
+            "nagRuleIds": [
+              "NIST.800.53.R5-S3DefaultEncryptionKMS"
+            ],
+            "caveat": "Evidences that access records exist and are protected. Their retention and review remain process controls."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiBucket/Bucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Server access logging enabled to a separate bucket",
+            "nagRuleIds": [
+              "NIST.800.53.R5-S3BucketLoggingEnabled"
+            ],
+            "caveat": "Records object-level access to this bucket only. Retention and review of those logs are properties of the destination bucket and of process, not of this resource."
+          }
+        },
+        {
+          "path": "ReferenceStack/StandaloneBucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Server access logging enabled to a separate bucket",
+            "nagRuleIds": [
+              "NIST.800.53.R5-S3BucketLoggingEnabled"
+            ],
+            "caveat": "Records object-level access to this bucket only. Retention and review of those logs are properties of the destination bucket and of process, not of this resource."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiDatabase/Instance",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Engine logs exported to CloudWatch Logs; Performance Insights and enhanced OS-level monitoring enabled, both encrypted with the CMK",
+            "nagRuleIds": [
+              "NIST.800.53.R5-RDSLoggingEnabled",
+              "NIST.800.53.R5-RDSEnhancedMonitoringEnabled"
+            ],
+            "caveat": "Produces the records. Retention, protection and review of them are properties of the log group and of process."
+          }
+        },
+        {
+          "path": "ReferenceStack/StandaloneDatabase",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Engine logs exported to CloudWatch Logs; Performance Insights and enhanced OS-level monitoring enabled, both encrypted with the CMK",
+            "nagRuleIds": [
+              "NIST.800.53.R5-RDSLoggingEnabled",
+              "NIST.800.53.R5-RDSEnhancedMonitoringEnabled"
+            ],
+            "caveat": "Produces the records. Retention, protection and review of them are properties of the log group and of process."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -479,7 +609,31 @@
         "nist800171": "3.4.1",
         "title": "Establish and maintain baseline configurations and inventories of organizational systems (including hardware, software, firmware, and documentation) throughout the respective system development life cycles."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/CuiDatabase/Instance",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "CM.L2-3.4.1",
+            "satisfaction": "supporting",
+            "evidence": "AutoMinorVersionUpgrade=true and DeletionProtection=true, so the instance stays patched and cannot be removed by an unreviewed stack change",
+            "caveat": "Baseline configuration of this one resource. Says nothing about the inventory or change control process the practice actually asks for."
+          }
+        },
+        {
+          "path": "ReferenceStack/StandaloneDatabase",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "CM.L2-3.4.1",
+            "satisfaction": "supporting",
+            "evidence": "AutoMinorVersionUpgrade=true and DeletionProtection=true, so the instance stays patched and cannot be removed by an unreviewed stack change",
+            "caveat": "Baseline configuration of this one resource. Says nothing about the inventory or change control process the practice actually asks for."
+          }
+        }
+      ],
+      "satisfaction": "supporting"
     },
     {
       "practice": {
@@ -622,7 +776,31 @@
         "nist800171": "3.5.3",
         "title": "Use multifactor authentication for local and network access to privileged accounts and for network access to non-privileged accounts.[24] [25]."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/CuiDatabase/Instance",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "IA.L2-3.5.3",
+            "satisfaction": "supporting",
+            "evidence": "IAM database authentication enabled, allowing credentials to be issued per-principal rather than shared",
+            "caveat": "Enables the mechanism. Whether multifactor authentication is actually enforced for database access depends on the IAM principals and identity provider in use."
+          }
+        },
+        {
+          "path": "ReferenceStack/StandaloneDatabase",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "IA.L2-3.5.3",
+            "satisfaction": "supporting",
+            "evidence": "IAM database authentication enabled, allowing credentials to be issued per-principal rather than shared",
+            "caveat": "Enables the mechanism. Whether multifactor authentication is actually enforced for database access depends on the IAM principals and identity provider in use."
+          }
+        }
+      ],
+      "satisfaction": "supporting"
     },
     {
       "practice": {
@@ -996,6 +1174,64 @@
             "evidence": "BackupPolicy=ENABLED, backups encrypted with the same customer-managed key",
             "caveat": "EFS automatic backups only. The file system is not enrolled in an AWS Backup plan, so retention and lifecycle are not governed here - see EncryptedFileSystem."
           }
+        },
+        {
+          "path": "ReferenceStack/CuiBucket/Bucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "MP.L2-3.8.9",
+            "satisfaction": "supporting",
+            "evidence": "Versioning enabled, so overwritten and deleted objects remain recoverable",
+            "caveat": "Versioning is not backup. There is no replication or lifecycle-governed retention here - see SecureBucket, and configure replication if your risk assessment needs it."
+          }
+        },
+        {
+          "path": "ReferenceStack/StandaloneBucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "MP.L2-3.8.9",
+            "satisfaction": "supporting",
+            "evidence": "Versioning enabled, so overwritten and deleted objects remain recoverable",
+            "caveat": "Versioning is not backup. There is no replication or lifecycle-governed retention here - see SecureBucket, and configure replication if your risk assessment needs it."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiDatabase",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "MP.L2-3.8.9",
+            "satisfaction": "partial",
+            "evidence": "Enrolled in an AWS Backup plan with 35-day retention, writing to a vault encrypted with a customer-managed KMS key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-RDSInBackupPlan"
+            ],
+            "caveat": "Evidences that backups exist, are retained, and are encrypted. Does not evidence restore testing."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiDatabase/Instance",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "MP.L2-3.8.9",
+            "satisfaction": "partial",
+            "evidence": "Automated backups retained for 35 days, encrypted with the CMK",
+            "caveat": "Automated backups only. The instance is not enrolled in an AWS Backup plan, so retention beyond the RDS window is not governed here - see EncryptedDatabaseInstance."
+          }
+        },
+        {
+          "path": "ReferenceStack/StandaloneDatabase",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "MP.L2-3.8.9",
+            "satisfaction": "partial",
+            "evidence": "Automated backups retained for 35 days, encrypted with the CMK",
+            "caveat": "Automated backups only. The instance is not enrolled in an AWS Backup plan, so retention beyond the RDS window is not governed here - see EncryptedDatabaseInstance."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -1282,6 +1518,17 @@
             "evidence": "Mount target security group created with allowAllOutbound=false",
             "caveat": "Establishes deny-by-default at this security group only. Ingress rules added by the caller, and any other path into the subnet, are out of scope."
           }
+        },
+        {
+          "path": "ReferenceStack/CuiDatabase",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.6",
+            "satisfaction": "partial",
+            "evidence": "Database security group created with allowAllOutbound=false",
+            "caveat": "Deny-by-default at this security group only. Ingress rules added by the caller are out of scope."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -1331,6 +1578,28 @@
             "satisfaction": "partial",
             "evidence": "Resource policy denies all actions where aws:SecureTransport is false",
             "caveat": "Enforces TLS at the file system. Does not evidence that clients mount with the TLS option, nor protect CUI in transit anywhere else in the system."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiBucket/Bucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.8",
+            "satisfaction": "partial",
+            "evidence": "Bucket policy denies all requests where aws:SecureTransport is false",
+            "caveat": "Enforces TLS at the bucket. Does not evidence protection of CUI in transit elsewhere in the system."
+          }
+        },
+        {
+          "path": "ReferenceStack/StandaloneBucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.8",
+            "satisfaction": "partial",
+            "evidence": "Bucket policy denies all requests where aws:SecureTransport is false",
+            "caveat": "Enforces TLS at the bucket. Does not evidence protection of CUI in transit elsewhere in the system."
           }
         }
       ],
@@ -1408,6 +1677,20 @@
             "satisfaction": "supporting",
             "evidence": "Encryption performed by AWS KMS using a customer-managed key",
             "caveat": "Whether the cryptography is FIPS-validated depends on the region and the endpoints in use, neither of which this construct controls. Evidence only."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiDatabase",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.11",
+            "satisfaction": "supporting",
+            "evidence": "Customer-managed KMS key with automatic annual rotation enabled",
+            "nagRuleIds": [
+              "NIST.800.53.R5-KMSBackingKeyRotationEnabled"
+            ],
+            "caveat": "FIPS validation depends on the region and endpoints in use, which this construct does not control."
           }
         }
       ],
@@ -1503,6 +1786,62 @@
               "NIST.800.53.R5-EFSEncrypted"
             ],
             "caveat": "Evidences encryption at rest only. Key custody, rotation policy and access authorisation are properties of the KMS key and its policy, not of this file system."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiBucket/Bucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "BucketEncryption=KMS with a customer-managed key; default encryption applies to all new objects",
+            "nagRuleIds": [
+              "NIST.800.53.R5-S3DefaultEncryptionKMS"
+            ],
+            "caveat": "Objects written before this setting, or copied in with an explicit override, are not covered. Key custody and rotation are properties of the KMS key."
+          }
+        },
+        {
+          "path": "ReferenceStack/StandaloneBucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "BucketEncryption=KMS with a customer-managed key; default encryption applies to all new objects",
+            "nagRuleIds": [
+              "NIST.800.53.R5-S3DefaultEncryptionKMS"
+            ],
+            "caveat": "Objects written before this setting, or copied in with an explicit override, are not covered. Key custody and rotation are properties of the KMS key."
+          }
+        },
+        {
+          "path": "ReferenceStack/CuiDatabase/Instance",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "StorageEncrypted=true with a customer-managed KMS key; automated backups and snapshots inherit it",
+            "nagRuleIds": [
+              "NIST.800.53.R5-RDSStorageEncrypted"
+            ],
+            "caveat": "Covers storage at rest. Does not evidence encryption of data exported from the database, nor key custody procedures."
+          }
+        },
+        {
+          "path": "ReferenceStack/StandaloneDatabase",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "StorageEncrypted=true with a customer-managed KMS key; automated backups and snapshots inherit it",
+            "nagRuleIds": [
+              "NIST.800.53.R5-RDSStorageEncrypted"
+            ],
+            "caveat": "Covers storage at rest. Does not evidence encryption of data exported from the database, nor key custody procedures."
           }
         }
       ],
@@ -1632,6 +1971,62 @@
     {
       "path": "ReferenceStack/StandaloneFileSystem/EfsMountTarget2",
       "cfnType": "AWS::EFS::MountTarget"
+    },
+    {
+      "path": "ReferenceStack/CuiBucket/AccessLogs/Policy/Resource",
+      "cfnType": "AWS::S3::BucketPolicy"
+    },
+    {
+      "path": "ReferenceStack/CuiBucket/Bucket/Policy/Resource",
+      "cfnType": "AWS::S3::BucketPolicy"
+    },
+    {
+      "path": "ReferenceStack/StandaloneBucket/Policy/Resource",
+      "cfnType": "AWS::S3::BucketPolicy"
+    },
+    {
+      "path": "ReferenceStack/CuiDatabase/SecurityGroup/from ReferenceStackCuiDatabaseInstanceRotationSingleUserSecurityGroupA866EE31:{IndirectPort}",
+      "cfnType": "AWS::EC2::SecurityGroupIngress"
+    },
+    {
+      "path": "ReferenceStack/CuiDatabase/Instance/Secret/Attachment/Resource",
+      "cfnType": "AWS::SecretsManager::SecretTargetAttachment"
+    },
+    {
+      "path": "ReferenceStack/CuiDatabase/Instance/Secret/Attachment/RotationSchedule/Resource",
+      "cfnType": "AWS::SecretsManager::RotationSchedule"
+    },
+    {
+      "path": "ReferenceStack/CuiDatabase/Instance/Secret/Attachment/Policy/Resource",
+      "cfnType": "AWS::SecretsManager::ResourcePolicy"
+    },
+    {
+      "path": "ReferenceStack/CuiDatabase/BackupVault/Resource",
+      "cfnType": "AWS::Backup::BackupVault"
+    },
+    {
+      "path": "ReferenceStack/CuiDatabase/BackupPlan/Resource",
+      "cfnType": "AWS::Backup::BackupPlan"
+    },
+    {
+      "path": "ReferenceStack/CuiDatabase/BackupPlan/BackupSelection/Resource",
+      "cfnType": "AWS::Backup::BackupSelection"
+    },
+    {
+      "path": "ReferenceStack/StandaloneDatabase/SecurityGroup/from ReferenceStackStandaloneDatabaseRotationSingleUserSecurityGroup152FEEBA:{IndirectPort}",
+      "cfnType": "AWS::EC2::SecurityGroupIngress"
+    },
+    {
+      "path": "ReferenceStack/StandaloneDatabase/Secret/Attachment/Resource",
+      "cfnType": "AWS::SecretsManager::SecretTargetAttachment"
+    },
+    {
+      "path": "ReferenceStack/StandaloneDatabase/Secret/Attachment/RotationSchedule/Resource",
+      "cfnType": "AWS::SecretsManager::RotationSchedule"
+    },
+    {
+      "path": "ReferenceStack/StandaloneDatabase/Secret/Attachment/Policy/Resource",
+      "cfnType": "AWS::SecretsManager::ResourcePolicy"
     }
   ],
   "violations": [
@@ -1640,6 +2035,45 @@
       "description": "The EFS is not in an AWS Backup plan - (Control IDs: CP-1(2), CP-2(5), CP-6a, CP-6(1), CP-6(2), CP-9a, CP-9b, CP-9c, CP-10, CP-10(2), SC-5(2), SI-13(5)). To help with data back-up processes, ensure your Amazon Elastic File System (Amazon EFS) file systems are a part of an AWS Backup plan. AWS Backup is a fully managed backup service with a policy-based backup solution. This solution simplifies your backup management and enables you to meet your business and regulatory backup compliance requirements.",
       "resources": [
         "ReferenceStack/StandaloneFileSystem/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-S3BucketReplicationEnabled",
+      "description": "The S3 Bucket does not have replication enabled - (Control IDs: AU-9(2), CM-6a, CM-9b, CP-1(2), CP-2(5), CP-6a, CP-6(1), CP-6(2), CP-9a, CP-9b, CP-9c, CP-10, CP-10(2), SC-5(2), SI-13(5)). Amazon Simple Storage Service (Amazon S3) Cross-Region Replication (CRR) supports maintaining adequate capacity and availability. CRR enables automatic, asynchronous copying of objects across Amazon S3 buckets to help ensure that data availability is maintained.",
+      "resources": [
+        "ReferenceStack/CuiBucket/AccessLogs/Resource",
+        "ReferenceStack/CuiBucket/Bucket/Resource",
+        "ReferenceStack/StandaloneBucket/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-EC2RestrictedCommonPorts",
+      "description": "Rule threw an error during validation. The parameter resolved to to a non-primitive value \"{\"Fn::GetAtt\":[\"CuiDatabaseInstanceE88092D2\",\"Endpoint.Port\"]}\", therefore the rule could not be validated.",
+      "resources": [
+        "ReferenceStack/CuiDatabase/SecurityGroup/from ReferenceStackCuiDatabaseInstanceRotationSingleUserSecurityGroupA866EE31:{IndirectPort}",
+        "ReferenceStack/StandaloneDatabase/SecurityGroup/from ReferenceStackStandaloneDatabaseRotationSingleUserSecurityGroup152FEEBA:{IndirectPort}"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-EC2RestrictedSSH",
+      "description": "Rule threw an error during validation. The parameter resolved to to a non-primitive value \"{\"Fn::GetAtt\":[\"CuiDatabaseInstanceE88092D2\",\"Endpoint.Port\"]}\", therefore the rule could not be validated.",
+      "resources": [
+        "ReferenceStack/CuiDatabase/SecurityGroup/from ReferenceStackCuiDatabaseInstanceRotationSingleUserSecurityGroupA866EE31:{IndirectPort}",
+        "ReferenceStack/StandaloneDatabase/SecurityGroup/from ReferenceStackStandaloneDatabaseRotationSingleUserSecurityGroup152FEEBA:{IndirectPort}"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-RDSInBackupPlan",
+      "description": "The RDS DB instance is not in an AWS Backup plan - (Control IDs: CP-1(2), CP-2(5), CP-6a, CP-6(1), CP-6(2), CP-9a, CP-9b, CP-9c, CP-10, CP-10(2), SC-5(2), SI-13(5)). To help with data back-up processes, ensure your Amazon Relational Database Service (Amazon RDS) instances are a part of an AWS Backup plan. AWS Backup is a fully managed backup service with a policy-based backup solution. This solution simplifies your backup management and enables you to meet your business and regulatory backup compliance requirements.",
+      "resources": [
+        "ReferenceStack/StandaloneDatabase/Resource"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-RDSMultiAZSupport",
+      "description": "The RDS DB Instance does not have multi-AZ support - (Control IDs: CP-1a.1(b), CP-1a.2, CP-2a, CP-2a.6, CP-2a.7, CP-2d, CP-2e, CP-2(5), CP-2(6), CP-6(2), CP-10, SC-5(2), SC-6, SC-22, SC-36, SI-13(5)). Multi-AZ support in Amazon Relational Database Service (Amazon RDS) provides enhanced availability and durability for database instances. When you provision a Multi-AZ database instance, Amazon RDS automatically creates a primary database instance, and synchronously replicates the data to a standby instance in a different Availability Zone. In case of an infrastructure failure, Amazon RDS performs an automatic failover to the standby so that you can resume database operations as soon as the failover is complete.",
+      "resources": [
+        "ReferenceStack/StandaloneDatabase/Resource"
       ]
     }
   ]

@@ -45,6 +45,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Generated coverage documentation for this library: `docs/coverage.md` and the README coverage
   table, both produced by `pnpm run coverage:build` and verified by `pnpm run coverage:check`.
 
+- `cmmc2/aws-s3` - `Bucket`, mandating KMS customer-managed encryption, full public-access
+  blocking, TLS-only access, versioning, `BucketOwnerEnforced` ownership and server access logging.
+- `cmmc2/aws-rds` - `DatabaseInstance`, mandating storage encryption with a customer-managed key, a
+  CMK-encrypted generated credential secret on a rotation schedule, IAM authentication, deletion
+  protection, enhanced monitoring, Performance Insights, and engine log exports.
+- `cmmc2/patterns` - `SecureBucket` and `EncryptedDatabaseInstance`.
+- `SnapshottableRemovalPolicy`, alongside `NonDestructiveRemovalPolicy`. RDS accepts a `Snapshot`
+  deletion policy where S3, EFS, KMS and Backup vaults do not, so the narrowing differs per resource.
+
 ### Changed
 
 - **Peer dependencies:** `aws-cdk-lib` floor raised to `^2.257.0`, and `cdk-nag` is now optional.

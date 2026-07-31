@@ -50,15 +50,15 @@ metadata that drives the constructs, so it cannot drift into overclaiming.
 
 <!-- compliant-constructs:coverage:start -->
 
-**6 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
+**9 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
 
 | Domain                                    | Addressed | Total   |
 | ----------------------------------------- | --------- | ------- |
 | AC - Access Control                       | 1         | 22      |
 | AT - Awareness and Training               | 0         | 3       |
-| AU - Audit and Accountability             | 0         | 9       |
-| CM - Configuration Management             | 0         | 9       |
-| IA - Identification and Authentication    | 0         | 11      |
+| AU - Audit and Accountability             | 1         | 9       |
+| CM - Configuration Management             | 1         | 9       |
+| IA - Identification and Authentication    | 1         | 11      |
 | IR - Incident Response                    | 0         | 3       |
 | MA - Maintenance                          | 0         | 6       |
 | MP - Media Protection                     | 1         | 9       |
@@ -68,7 +68,7 @@ metadata that drives the constructs, so it cannot drift into overclaiming.
 | CA - Security Assessment                  | 0         | 4       |
 | SC - System and Communications Protection | 4         | 16      |
 | SI - System and Information Integrity     | 0         | 7       |
-| **Total**                                 | **6**     | **110** |
+| **Total**                                 | **9**     | **110** |
 
 <!-- compliant-constructs:coverage:end -->
 
@@ -105,11 +105,36 @@ This library's own acceptance gate is:
 
 > Every construct here passes `NIST80053R5Checks` with zero suppressions.
 
-`EncryptedFileSystem` meets that, and there is a test asserting it. The 1:1 `FileSystem` wrapper
-cannot: `EFSInBackupPlan` wants an `AWS::Backup::BackupSelection`, and a drop-in replacement for
-`efs.FileSystem` has no business creating resources the construct it replaces does not. Its one
-outstanding finding is pinned by a test, so a future cdk-nag adding an EFS rule fails the build here
-rather than surfacing in your audit.
+Where a construct cannot meet it, the outstanding findings are **pinned by a test** rather than
+suppressed - so a future cdk-nag rule fails the build here instead of surfacing in your audit.
+
+| Construct                                       | Outstanding findings                           | Why                                                                                                                                                            |
+| ----------------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EncryptedFileSystem`                           | none                                           |                                                                                                                                                                |
+| `FileSystem`                                    | `EFSInBackupPlan`                              | wants an `AWS::Backup::BackupSelection`; a drop-in replacement has no business creating resources the construct it replaces does not                           |
+| `SecureBucket`, `Bucket`                        | `S3BucketReplicationEnabled`                   | satisfying it means a second bucket and a replication role - doubled storage cost, and for CUI in GovCloud a data-residency decision we will not make silently |
+| `EncryptedDatabaseInstance`, `DatabaseInstance` | `EC2RestrictedCommonPorts`, `EC2RestrictedSSH` | false positives: credential rotation attaches an ingress rule whose port is an unresolved `Fn::GetAtt`, which cdk-nag cannot prove is not 22 or 3389           |
+| `DatabaseInstance`                              | also `RDSInBackupPlan`                         | as above; use `EncryptedDatabaseInstance`                                                                                                                      |
+
+The RDS pair is worth dwelling on. We could clear those two findings by defaulting credential
+rotation off - and that would trade a real control for a cosmetic one, so it is not on offer.
+
+## Modules
+
+| Import           | Contains                                                           |
+| ---------------- | ------------------------------------------------------------------ |
+| `cmmc2`          | `CompliantStack`, the practice catalog, `cmmc2Claim()`             |
+| `cmmc2/aws-efs`  | `FileSystem`                                                       |
+| `cmmc2/aws-s3`   | `Bucket`                                                           |
+| `cmmc2/aws-rds`  | `DatabaseInstance`                                                 |
+| `cmmc2/patterns` | `EncryptedFileSystem`, `SecureBucket`, `EncryptedDatabaseInstance` |
+| `verify`         | `verifyCompliance()` (needs the optional `cdk-nag` peer)           |
+| `report`         | `writeAttestation()` and the renderers                             |
+
+One constraint worth knowing: a compliant `Bucket` cannot receive another bucket's server access
+logs. `ObjectOwnership=BucketOwnerEnforced` disables ACLs, and CDK's log-delivery wiring sets one on
+the target. `SecureBucket` creates a plain bucket for that purpose; disabling ACLs on the data bucket
+is worth the restriction.
 
 ## Evidence generation
 

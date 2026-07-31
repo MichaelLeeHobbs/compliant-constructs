@@ -5,7 +5,7 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import type * as kms from 'aws-cdk-lib/aws-kms'
 import { type Construct } from 'constructs'
 
-import { addControlClaims } from '../../index.js'
+import { addControlClaims, type NonDestructiveRemovalPolicy } from '../../index.js'
 import { cmmc2Claim } from '../index.js'
 
 /**
@@ -30,23 +30,6 @@ type MandatedProps =
 type _MandatedPropsExistUpstream = MandatedProps extends keyof efs.FileSystemProps ? true : never
 const _canary: _MandatedPropsExistUpstream = true
 void _canary
-
-/**
- * Removal policies that neither destroy CUI nor emit an invalid template.
- *
- * `DESTROY` is excluded for the obvious reason. `SNAPSHOT` is excluded for a
- * less obvious one: `AWS::EFS::FileSystem` does not accept it. CloudFormation
- * allows only `Delete`, `Retain` and `RetainExceptOnCreate` there, so offering
- * `RemovalPolicy.SNAPSHOT` would let a caller synthesize a template that fails
- * at deploy time. The same is true of the KMS keys and backup vaults these
- * constructs create.
- *
- * Narrowing has to be per-resource to be correct. A single library-wide
- * "retaining policies" union would be wrong for exactly this reason.
- */
-export type NonDestructiveRemovalPolicy =
-  | RemovalPolicy.RETAIN
-  | RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
 
 export interface FileSystemProps extends Omit<efs.FileSystemProps, MandatedProps> {
   /**
@@ -189,3 +172,5 @@ function assertSubnetsAreNotPublic(vpc: ec2.IVpc, selection: ec2.SubnetSelection
     )
   }
 }
+
+export { type NonDestructiveRemovalPolicy } from '../../index.js'

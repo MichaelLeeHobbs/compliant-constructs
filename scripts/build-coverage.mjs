@@ -23,9 +23,14 @@ const { App } = await import('aws-cdk-lib')
 const ec2 = await import('aws-cdk-lib/aws-ec2')
 const kms = await import('aws-cdk-lib/aws-kms')
 
+const rds = await import('aws-cdk-lib/aws-rds')
+
 const { CompliantStack } = await import('../dist/cmmc2/index.mjs')
 const { FileSystem } = await import('../dist/cmmc2/aws-efs/index.mjs')
-const { EncryptedFileSystem } = await import('../dist/cmmc2/patterns/index.mjs')
+const { Bucket } = await import('../dist/cmmc2/aws-s3/index.mjs')
+const { DatabaseInstance } = await import('../dist/cmmc2/aws-rds/index.mjs')
+const { EncryptedDatabaseInstance, EncryptedFileSystem, SecureBucket } =
+  await import('../dist/cmmc2/patterns/index.mjs')
 const { buildAttestation } = await import('../dist/report/index.mjs')
 const { verifyCompliance } = await import('../dist/verify.mjs')
 const { main } = await import('../dist/cli/attest.mjs')
@@ -64,6 +69,37 @@ function referenceApp() {
 
   const key = new kms.Key(stack, 'StandaloneKey', { enableKeyRotation: true })
   new FileSystem(stack, 'StandaloneFileSystem', { vpc, vpcSubnets, kmsKey: key })
+
+  const cuiBucket = new SecureBucket(stack, 'CuiBucket', { bucketName: 'reference-cui' })
+  // Reuses the log bucket SecureBucket created. A compliant Bucket cannot itself
+  // be a log destination: ObjectOwnership=BucketOwnerEnforced disables the ACL
+  // that CDK's log-delivery wiring sets on the target.
+  new Bucket(stack, 'StandaloneBucket', {
+    encryptionKey: key,
+    serverAccessLogsBucket: cuiBucket.serverAccessLogsBucket,
+    serverAccessLogsPrefix: 'standalone/',
+  })
+
+  const engine = rds.DatabaseInstanceEngine.postgres({
+    version: rds.PostgresEngineVersion.VER_16_4,
+  })
+  const instanceType = ec2.InstanceType.of(ec2.InstanceClass.T4G, ec2.InstanceSize.MEDIUM)
+
+  new EncryptedDatabaseInstance(stack, 'CuiDatabase', {
+    vpc,
+    vpcSubnets,
+    databaseName: 'referencecui',
+    engine,
+    instanceType,
+  })
+  new DatabaseInstance(stack, 'StandaloneDatabase', {
+    vpc,
+    vpcSubnets,
+    engine,
+    instanceType,
+    encryptionKey: key,
+    masterUsername: 'dbadmin',
+  })
 
   return stack
 }

@@ -7,3 +7,17 @@ ReferenceStack/CuiStorage/BackupPlan/Resource,AWS::Backup::BackupPlan,CloudForma
 ReferenceStack/CuiStorage/BackupPlan/BackupSelection/Resource,AWS::Backup::BackupSelection,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/StandaloneFileSystem/EfsMountTarget1,AWS::EFS::MountTarget,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/StandaloneFileSystem/EfsMountTarget2,AWS::EFS::MountTarget,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiBucket/AccessLogs/Policy/Resource,AWS::S3::BucketPolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiBucket/Bucket/Policy/Resource,AWS::S3::BucketPolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/StandaloneBucket/Policy/Resource,AWS::S3::BucketPolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiDatabase/SecurityGroup/from ReferenceStackCuiDatabaseInstanceRotationSingleUserSecurityGroupA866EE31:{IndirectPort},AWS::EC2::SecurityGroupIngress,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiDatabase/Instance/Secret/Attachment/Resource,AWS::SecretsManager::SecretTargetAttachment,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiDatabase/Instance/Secret/Attachment/RotationSchedule/Resource,AWS::SecretsManager::RotationSchedule,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiDatabase/Instance/Secret/Attachment/Policy/Resource,AWS::SecretsManager::ResourcePolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiDatabase/BackupVault/Resource,AWS::Backup::BackupVault,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiDatabase/BackupPlan/Resource,AWS::Backup::BackupPlan,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/CuiDatabase/BackupPlan/BackupSelection/Resource,AWS::Backup::BackupSelection,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/StandaloneDatabase/SecurityGroup/from ReferenceStackStandaloneDatabaseRotationSingleUserSecurityGroup152FEEBA:{IndirectPort},AWS::EC2::SecurityGroupIngress,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/StandaloneDatabase/Secret/Attachment/Resource,AWS::SecretsManager::SecretTargetAttachment,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/StandaloneDatabase/Secret/Attachment/RotationSchedule/Resource,AWS::SecretsManager::RotationSchedule,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/StandaloneDatabase/Secret/Attachment/Policy/Resource,AWS::SecretsManager::ResourcePolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it

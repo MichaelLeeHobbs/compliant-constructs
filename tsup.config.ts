@@ -12,6 +12,8 @@ export default defineConfig({
     'src/cli/bin.ts',
     'src/cmmc2/index.ts',
     'src/cmmc2/aws-efs/index.ts',
+    'src/cmmc2/aws-rds/index.ts',
+    'src/cmmc2/aws-s3/index.ts',
     'src/cmmc2/patterns/index.ts',
   ],
   format: ['esm', 'cjs'],

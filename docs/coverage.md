@@ -6,15 +6,15 @@ Practice text is taken verbatim from NIST SP 800-171 Rev 2, the revision CMMC Le
 pinned to by 32 CFR Part 170. Every claim below states what it evidences **and what it does
 not** - no practice here is satisfied by infrastructure configuration alone.
 
-**6 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
+**9 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
 
 | Domain                                    | Addressed | Total   |
 | ----------------------------------------- | --------- | ------- |
 | AC - Access Control                       | 1         | 22      |
 | AT - Awareness and Training               | 0         | 3       |
-| AU - Audit and Accountability             | 0         | 9       |
-| CM - Configuration Management             | 0         | 9       |
-| IA - Identification and Authentication    | 0         | 11      |
+| AU - Audit and Accountability             | 1         | 9       |
+| CM - Configuration Management             | 1         | 9       |
+| IA - Identification and Authentication    | 1         | 11      |
 | IR - Incident Response                    | 0         | 3       |
 | MA - Maintenance                          | 0         | 6       |
 | MP - Media Protection                     | 1         | 9       |
@@ -24,38 +24,82 @@ not** - no practice here is satisfied by infrastructure configuration alone.
 | CA - Security Assessment                  | 0         | 4       |
 | SC - System and Communications Protection | 4         | 16      |
 | SI - System and Information Integrity     | 0         | 7       |
-| **Total**                                 | **6**     | **110** |
+| **Total**                                 | **9**     | **110** |
 
 ## Addressed practices
 
 ### AC.L2-3.1.3 - Control the flow of CUI in accordance with approved authorizations.
 
-**Domain:** Access Control · **NIST SP 800-171 Rev 2:** 3.1.3 · **Strongest claim:** supporting
+**Domain:** Access Control · **NIST SP 800-171 Rev 2:** 3.1.3 · **Strongest claim:** partial
 
-| Construct                              | Level      | Evidence                                                                        | Not evidenced by this claim                                                                                                           |
-| -------------------------------------- | ---------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `ReferenceStack/CuiStorage/FileSystem` | supporting | AllowAnonymousAccess=false; access mediated by mount targets in private subnets | Flow control depends primarily on the security groups and network ACLs governing the mount targets, which are supplied by the caller. |
-| `ReferenceStack/StandaloneFileSystem`  | supporting | AllowAnonymousAccess=false; access mediated by mount targets in private subnets | Flow control depends primarily on the security groups and network ACLs governing the mount targets, which are supplied by the caller. |
+| Construct                              | Level      | Evidence                                                                                                                                            | Not evidenced by this claim                                                                                                           |
+| -------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `ReferenceStack/CuiStorage/FileSystem` | supporting | AllowAnonymousAccess=false; access mediated by mount targets in private subnets                                                                     | Flow control depends primarily on the security groups and network ACLs governing the mount targets, which are supplied by the caller. |
+| `ReferenceStack/StandaloneFileSystem`  | supporting | AllowAnonymousAccess=false; access mediated by mount targets in private subnets                                                                     | Flow control depends primarily on the security groups and network ACLs governing the mount targets, which are supplied by the caller. |
+| `ReferenceStack/CuiBucket/Bucket`      | partial    | BlockPublicAcls, BlockPublicPolicy, IgnorePublicAcls and RestrictPublicBuckets all true; ObjectOwnership=BucketOwnerEnforced disables ACLs entirely | Prevents public exposure. Authorised access between principals is governed by IAM and the bucket policy, which the caller supplies.   |
+| `ReferenceStack/StandaloneBucket`      | partial    | BlockPublicAcls, BlockPublicPolicy, IgnorePublicAcls and RestrictPublicBuckets all true; ObjectOwnership=BucketOwnerEnforced disables ACLs entirely | Prevents public exposure. Authorised access between principals is governed by IAM and the bucket policy, which the caller supplies.   |
+| `ReferenceStack/CuiDatabase/Instance`  | partial    | PubliclyAccessible=false; reachable only from within the VPC                                                                                        | Prevents exposure to the internet. Access from within the VPC is governed by the security groups the caller supplies.                 |
+| `ReferenceStack/StandaloneDatabase`    | partial    | PubliclyAccessible=false; reachable only from within the VPC                                                                                        | Prevents exposure to the internet. Access from within the VPC is governed by the security groups the caller supplies.                 |
+
+Reconciles with cdk-nag: `NIST.800.53.R5-S3BucketPublicReadProhibited`, `NIST.800.53.R5-RDSInstancePublicAccess`
+
+### AU.L2-3.3.1 - Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity
+
+**Domain:** Audit and Accountability · **NIST SP 800-171 Rev 2:** 3.3.1 · **Strongest claim:** partial
+
+| Construct                             | Level   | Evidence                                                                                                                            | Not evidenced by this claim                                                                                                                                        |
+| ------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ReferenceStack/CuiBucket`            | partial | Server access logs delivered to a dedicated bucket that is itself encrypted with a customer-managed key and blocks public access    | Evidences that access records exist and are protected. Their retention and review remain process controls.                                                         |
+| `ReferenceStack/CuiBucket/Bucket`     | partial | Server access logging enabled to a separate bucket                                                                                  | Records object-level access to this bucket only. Retention and review of those logs are properties of the destination bucket and of process, not of this resource. |
+| `ReferenceStack/StandaloneBucket`     | partial | Server access logging enabled to a separate bucket                                                                                  | Records object-level access to this bucket only. Retention and review of those logs are properties of the destination bucket and of process, not of this resource. |
+| `ReferenceStack/CuiDatabase/Instance` | partial | Engine logs exported to CloudWatch Logs; Performance Insights and enhanced OS-level monitoring enabled, both encrypted with the CMK | Produces the records. Retention, protection and review of them are properties of the log group and of process.                                                     |
+| `ReferenceStack/StandaloneDatabase`   | partial | Engine logs exported to CloudWatch Logs; Performance Insights and enhanced OS-level monitoring enabled, both encrypted with the CMK | Produces the records. Retention, protection and review of them are properties of the log group and of process.                                                     |
+
+Reconciles with cdk-nag: `NIST.800.53.R5-S3DefaultEncryptionKMS`, `NIST.800.53.R5-S3BucketLoggingEnabled`, `NIST.800.53.R5-RDSLoggingEnabled`, `NIST.800.53.R5-RDSEnhancedMonitoringEnabled`
+
+### CM.L2-3.4.1 - Establish and maintain baseline configurations and inventories of organizational systems (including hardware, software, firmware, and documentation) throughout the respective system development life cycles.
+
+**Domain:** Configuration Management · **NIST SP 800-171 Rev 2:** 3.4.1 · **Strongest claim:** supporting
+
+| Construct                             | Level      | Evidence                                                                                                                                    | Not evidenced by this claim                                                                                                             |
+| ------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `ReferenceStack/CuiDatabase/Instance` | supporting | AutoMinorVersionUpgrade=true and DeletionProtection=true, so the instance stays patched and cannot be removed by an unreviewed stack change | Baseline configuration of this one resource. Says nothing about the inventory or change control process the practice actually asks for. |
+| `ReferenceStack/StandaloneDatabase`   | supporting | AutoMinorVersionUpgrade=true and DeletionProtection=true, so the instance stays patched and cannot be removed by an unreviewed stack change | Baseline configuration of this one resource. Says nothing about the inventory or change control process the practice actually asks for. |
+
+### IA.L2-3.5.3 - Use multifactor authentication for local and network access to privileged accounts and for network access to non-privileged accounts.[24] [25].
+
+**Domain:** Identification and Authentication · **NIST SP 800-171 Rev 2:** 3.5.3 · **Strongest claim:** supporting
+
+| Construct                             | Level      | Evidence                                                                                                | Not evidenced by this claim                                                                                                                                    |
+| ------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ReferenceStack/CuiDatabase/Instance` | supporting | IAM database authentication enabled, allowing credentials to be issued per-principal rather than shared | Enables the mechanism. Whether multifactor authentication is actually enforced for database access depends on the IAM principals and identity provider in use. |
+| `ReferenceStack/StandaloneDatabase`   | supporting | IAM database authentication enabled, allowing credentials to be issued per-principal rather than shared | Enables the mechanism. Whether multifactor authentication is actually enforced for database access depends on the IAM principals and identity provider in use. |
 
 ### MP.L2-3.8.9 - Protect the confidentiality of backup CUI at storage locations.
 
 **Domain:** Media Protection · **NIST SP 800-171 Rev 2:** 3.8.9 · **Strongest claim:** partial
 
-| Construct                              | Level   | Evidence                                                                                                           | Not evidenced by this claim                                                                                                                                    |
-| -------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ReferenceStack/CuiStorage`            | partial | Enrolled in an AWS Backup plan with 35-day retention, writing to a vault encrypted with a customer-managed KMS key | Evidences that backups exist, are retained, and are encrypted. Does not evidence restore testing or off-site handling procedures.                              |
-| `ReferenceStack/CuiStorage/FileSystem` | partial | BackupPolicy=ENABLED, backups encrypted with the same customer-managed key                                         | EFS automatic backups only. The file system is not enrolled in an AWS Backup plan, so retention and lifecycle are not governed here - see EncryptedFileSystem. |
-| `ReferenceStack/StandaloneFileSystem`  | partial | BackupPolicy=ENABLED, backups encrypted with the same customer-managed key                                         | EFS automatic backups only. The file system is not enrolled in an AWS Backup plan, so retention and lifecycle are not governed here - see EncryptedFileSystem. |
+| Construct                              | Level      | Evidence                                                                                                           | Not evidenced by this claim                                                                                                                                            |
+| -------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ReferenceStack/CuiStorage`            | partial    | Enrolled in an AWS Backup plan with 35-day retention, writing to a vault encrypted with a customer-managed KMS key | Evidences that backups exist, are retained, and are encrypted. Does not evidence restore testing or off-site handling procedures.                                      |
+| `ReferenceStack/CuiStorage/FileSystem` | partial    | BackupPolicy=ENABLED, backups encrypted with the same customer-managed key                                         | EFS automatic backups only. The file system is not enrolled in an AWS Backup plan, so retention and lifecycle are not governed here - see EncryptedFileSystem.         |
+| `ReferenceStack/StandaloneFileSystem`  | partial    | BackupPolicy=ENABLED, backups encrypted with the same customer-managed key                                         | EFS automatic backups only. The file system is not enrolled in an AWS Backup plan, so retention and lifecycle are not governed here - see EncryptedFileSystem.         |
+| `ReferenceStack/CuiBucket/Bucket`      | supporting | Versioning enabled, so overwritten and deleted objects remain recoverable                                          | Versioning is not backup. There is no replication or lifecycle-governed retention here - see SecureBucket, and configure replication if your risk assessment needs it. |
+| `ReferenceStack/StandaloneBucket`      | supporting | Versioning enabled, so overwritten and deleted objects remain recoverable                                          | Versioning is not backup. There is no replication or lifecycle-governed retention here - see SecureBucket, and configure replication if your risk assessment needs it. |
+| `ReferenceStack/CuiDatabase`           | partial    | Enrolled in an AWS Backup plan with 35-day retention, writing to a vault encrypted with a customer-managed KMS key | Evidences that backups exist, are retained, and are encrypted. Does not evidence restore testing.                                                                      |
+| `ReferenceStack/CuiDatabase/Instance`  | partial    | Automated backups retained for 35 days, encrypted with the CMK                                                     | Automated backups only. The instance is not enrolled in an AWS Backup plan, so retention beyond the RDS window is not governed here - see EncryptedDatabaseInstance.   |
+| `ReferenceStack/StandaloneDatabase`    | partial    | Automated backups retained for 35 days, encrypted with the CMK                                                     | Automated backups only. The instance is not enrolled in an AWS Backup plan, so retention beyond the RDS window is not governed here - see EncryptedDatabaseInstance.   |
 
-Reconciles with cdk-nag: `NIST.800.53.R5-EFSInBackupPlan`
+Reconciles with cdk-nag: `NIST.800.53.R5-EFSInBackupPlan`, `NIST.800.53.R5-RDSInBackupPlan`
 
 ### SC.L2-3.13.6 - Deny network communications traffic by default and allow network communications traffic by exception (i.e., deny all, permit by exception).
 
 **Domain:** System and Communications Protection · **NIST SP 800-171 Rev 2:** 3.13.6 · **Strongest claim:** partial
 
-| Construct                   | Level   | Evidence                                                        | Not evidenced by this claim                                                                                                                       |
-| --------------------------- | ------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ReferenceStack/CuiStorage` | partial | Mount target security group created with allowAllOutbound=false | Establishes deny-by-default at this security group only. Ingress rules added by the caller, and any other path into the subnet, are out of scope. |
+| Construct                    | Level   | Evidence                                                        | Not evidenced by this claim                                                                                                                       |
+| ---------------------------- | ------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ReferenceStack/CuiStorage`  | partial | Mount target security group created with allowAllOutbound=false | Establishes deny-by-default at this security group only. Ingress rules added by the caller, and any other path into the subnet, are out of scope. |
+| `ReferenceStack/CuiDatabase` | partial | Database security group created with allowAllOutbound=false     | Deny-by-default at this security group only. Ingress rules added by the caller are out of scope.                                                  |
 
 ### SC.L2-3.13.8 - Implement cryptographic mechanisms to prevent unauthorized disclosure of CUI during transmission unless otherwise protected by alternative physical safeguards.
 
@@ -65,6 +109,8 @@ Reconciles with cdk-nag: `NIST.800.53.R5-EFSInBackupPlan`
 | -------------------------------------- | ------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ReferenceStack/CuiStorage/FileSystem` | partial | Resource policy denies all actions where aws:SecureTransport is false | Enforces TLS at the file system. Does not evidence that clients mount with the TLS option, nor protect CUI in transit anywhere else in the system. |
 | `ReferenceStack/StandaloneFileSystem`  | partial | Resource policy denies all actions where aws:SecureTransport is false | Enforces TLS at the file system. Does not evidence that clients mount with the TLS option, nor protect CUI in transit anywhere else in the system. |
+| `ReferenceStack/CuiBucket/Bucket`      | partial | Bucket policy denies all requests where aws:SecureTransport is false  | Enforces TLS at the bucket. Does not evidence protection of CUI in transit elsewhere in the system.                                                |
+| `ReferenceStack/StandaloneBucket`      | partial | Bucket policy denies all requests where aws:SecureTransport is false  | Enforces TLS at the bucket. Does not evidence protection of CUI in transit elsewhere in the system.                                                |
 
 ### SC.L2-3.13.11 - Employ FIPS-validated cryptography when used to protect the confidentiality of CUI.
 
@@ -75,6 +121,7 @@ Reconciles with cdk-nag: `NIST.800.53.R5-EFSInBackupPlan`
 | `ReferenceStack/CuiStorage`            | supporting | Customer-managed KMS key with automatic annual rotation enabled | FIPS validation depends on the region and endpoints in use, which this construct does not control.                                                  |
 | `ReferenceStack/CuiStorage/FileSystem` | supporting | Encryption performed by AWS KMS using a customer-managed key    | Whether the cryptography is FIPS-validated depends on the region and the endpoints in use, neither of which this construct controls. Evidence only. |
 | `ReferenceStack/StandaloneFileSystem`  | supporting | Encryption performed by AWS KMS using a customer-managed key    | Whether the cryptography is FIPS-validated depends on the region and the endpoints in use, neither of which this construct controls. Evidence only. |
+| `ReferenceStack/CuiDatabase`           | supporting | Customer-managed KMS key with automatic annual rotation enabled | FIPS validation depends on the region and endpoints in use, which this construct does not control.                                                  |
 
 Reconciles with cdk-nag: `NIST.800.53.R5-KMSBackingKeyRotationEnabled`
 
@@ -82,16 +129,20 @@ Reconciles with cdk-nag: `NIST.800.53.R5-KMSBackingKeyRotationEnabled`
 
 **Domain:** System and Communications Protection · **NIST SP 800-171 Rev 2:** 3.13.16 · **Strongest claim:** partial
 
-| Construct                              | Level   | Evidence                                       | Not evidenced by this claim                                                                                                                                     |
-| -------------------------------------- | ------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ReferenceStack/CuiStorage/FileSystem` | partial | Encrypted=true with a customer-managed KMS key | Evidences encryption at rest only. Key custody, rotation policy and access authorisation are properties of the KMS key and its policy, not of this file system. |
-| `ReferenceStack/StandaloneFileSystem`  | partial | Encrypted=true with a customer-managed KMS key | Evidences encryption at rest only. Key custody, rotation policy and access authorisation are properties of the KMS key and its policy, not of this file system. |
+| Construct                              | Level   | Evidence                                                                                          | Not evidenced by this claim                                                                                                                                     |
+| -------------------------------------- | ------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ReferenceStack/CuiStorage/FileSystem` | partial | Encrypted=true with a customer-managed KMS key                                                    | Evidences encryption at rest only. Key custody, rotation policy and access authorisation are properties of the KMS key and its policy, not of this file system. |
+| `ReferenceStack/StandaloneFileSystem`  | partial | Encrypted=true with a customer-managed KMS key                                                    | Evidences encryption at rest only. Key custody, rotation policy and access authorisation are properties of the KMS key and its policy, not of this file system. |
+| `ReferenceStack/CuiBucket/Bucket`      | partial | BucketEncryption=KMS with a customer-managed key; default encryption applies to all new objects   | Objects written before this setting, or copied in with an explicit override, are not covered. Key custody and rotation are properties of the KMS key.           |
+| `ReferenceStack/StandaloneBucket`      | partial | BucketEncryption=KMS with a customer-managed key; default encryption applies to all new objects   | Objects written before this setting, or copied in with an explicit override, are not covered. Key custody and rotation are properties of the KMS key.           |
+| `ReferenceStack/CuiDatabase/Instance`  | partial | StorageEncrypted=true with a customer-managed KMS key; automated backups and snapshots inherit it | Covers storage at rest. Does not evidence encryption of data exported from the database, nor key custody procedures.                                            |
+| `ReferenceStack/StandaloneDatabase`    | partial | StorageEncrypted=true with a customer-managed KMS key; automated backups and snapshots inherit it | Covers storage at rest. Does not evidence encryption of data exported from the database, nor key custody procedures.                                            |
 
-Reconciles with cdk-nag: `NIST.800.53.R5-EFSEncrypted`
+Reconciles with cdk-nag: `NIST.800.53.R5-EFSEncrypted`, `NIST.800.53.R5-S3DefaultEncryptionKMS`, `NIST.800.53.R5-RDSStorageEncrypted`
 
 ## Not addressed
 
-104 of 110 practices have no claim against them.
+101 of 110 practices have no claim against them.
 Most are organizational rather than technical - policy, training, personnel screening - and
 are not the sort of thing infrastructure code can evidence. Some are simply not covered yet.
 
@@ -121,7 +172,6 @@ are not the sort of thing infrastructure code can evidence. Some are simply not 
 | AT.L2-3.2.1   | Ensure that managers, systems administrators, and users of organizational systems are made aware of the security risks associated with their activities and of the applicable policies, standards, and procedures related to the security of those systems.                   |
 | AT.L2-3.2.2   | Ensure that personnel are trained to carry out their assigned information security-related duties and responsibilities.                                                                                                                                                       |
 | AT.L2-3.2.3   | Provide security awareness training on recognizing and reporting potential indicators of insider threat.                                                                                                                                                                      |
-| AU.L2-3.3.1   | Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity                                                                                             |
 | AU.L2-3.3.2   | Ensure that the actions of individual system users can be uniquely traced to those users, so they can be held accountable for their actions.                                                                                                                                  |
 | AU.L2-3.3.3   | Review and update logged events.                                                                                                                                                                                                                                              |
 | AU.L2-3.3.4   | Alert in the event of an audit logging process failure.                                                                                                                                                                                                                       |
@@ -130,7 +180,6 @@ are not the sort of thing infrastructure code can evidence. Some are simply not 
 | AU.L2-3.3.7   | Provide a system capability that compares and synchronizes internal system clocks with an authoritative source to generate time stamps for audit records                                                                                                                      |
 | AU.L2-3.3.8   | Protect audit information and audit logging tools from unauthorized access, modification, and deletion.                                                                                                                                                                       |
 | AU.L2-3.3.9   | Limit management of audit logging functionality to a subset of privileged users.                                                                                                                                                                                              |
-| CM.L2-3.4.1   | Establish and maintain baseline configurations and inventories of organizational systems (including hardware, software, firmware, and documentation) throughout the respective system development life cycles.                                                                |
 | CM.L2-3.4.2   | Establish and enforce security configuration settings for information technology products employed in organizational systems.                                                                                                                                                 |
 | CM.L2-3.4.3   | Track, review, approve or disapprove, and log changes to organizational systems.                                                                                                                                                                                              |
 | CM.L2-3.4.4   | Analyze the security impact of changes prior to implementation.                                                                                                                                                                                                               |
@@ -141,7 +190,6 @@ are not the sort of thing infrastructure code can evidence. Some are simply not 
 | CM.L2-3.4.9   | Control and monitor user-installed software.                                                                                                                                                                                                                                  |
 | IA.L2-3.5.1   | Identify system users, processes acting on behalf of users, and devices.                                                                                                                                                                                                      |
 | IA.L2-3.5.2   | Authenticate (or verify) the identities of users, processes, or devices, as a prerequisite to allowing access to organizational systems.                                                                                                                                      |
-| IA.L2-3.5.3   | Use multifactor authentication for local and network access to privileged accounts and for network access to non-privileged accounts.[24] [25].                                                                                                                               |
 | IA.L2-3.5.4   | Employ replay-resistant authentication mechanisms for network access to privileged and non-privileged accounts.                                                                                                                                                               |
 | IA.L2-3.5.5   | Prevent reuse of identifiers for a defined period.                                                                                                                                                                                                                            |
 | IA.L2-3.5.6   | Disable identifiers after a defined period of inactivity.                                                                                                                                                                                                                     |
@@ -208,19 +256,38 @@ CDK tagging reaches only CloudFormation resources whose type has a tags property
 are in the deployment but cannot carry the `ContainsCui` tag, so their scope is inherited
 from their parent rather than stated on the resource.
 
-| Construct                                                       | Type                         |
-| --------------------------------------------------------------- | ---------------------------- |
-| `ReferenceStack/CuiStorage/Key/Alias/Resource`                  | AWS::KMS::Alias              |
-| `ReferenceStack/CuiStorage/FileSystem/EfsMountTarget1`          | AWS::EFS::MountTarget        |
-| `ReferenceStack/CuiStorage/FileSystem/EfsMountTarget2`          | AWS::EFS::MountTarget        |
-| `ReferenceStack/CuiStorage/BackupVault/Resource`                | AWS::Backup::BackupVault     |
-| `ReferenceStack/CuiStorage/BackupPlan/Resource`                 | AWS::Backup::BackupPlan      |
-| `ReferenceStack/CuiStorage/BackupPlan/BackupSelection/Resource` | AWS::Backup::BackupSelection |
-| `ReferenceStack/StandaloneFileSystem/EfsMountTarget1`           | AWS::EFS::MountTarget        |
-| `ReferenceStack/StandaloneFileSystem/EfsMountTarget2`           | AWS::EFS::MountTarget        |
+| Construct                                                                                                                                     | Type                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `ReferenceStack/CuiStorage/Key/Alias/Resource`                                                                                                | AWS::KMS::Alias                             |
+| `ReferenceStack/CuiStorage/FileSystem/EfsMountTarget1`                                                                                        | AWS::EFS::MountTarget                       |
+| `ReferenceStack/CuiStorage/FileSystem/EfsMountTarget2`                                                                                        | AWS::EFS::MountTarget                       |
+| `ReferenceStack/CuiStorage/BackupVault/Resource`                                                                                              | AWS::Backup::BackupVault                    |
+| `ReferenceStack/CuiStorage/BackupPlan/Resource`                                                                                               | AWS::Backup::BackupPlan                     |
+| `ReferenceStack/CuiStorage/BackupPlan/BackupSelection/Resource`                                                                               | AWS::Backup::BackupSelection                |
+| `ReferenceStack/StandaloneFileSystem/EfsMountTarget1`                                                                                         | AWS::EFS::MountTarget                       |
+| `ReferenceStack/StandaloneFileSystem/EfsMountTarget2`                                                                                         | AWS::EFS::MountTarget                       |
+| `ReferenceStack/CuiBucket/AccessLogs/Policy/Resource`                                                                                         | AWS::S3::BucketPolicy                       |
+| `ReferenceStack/CuiBucket/Bucket/Policy/Resource`                                                                                             | AWS::S3::BucketPolicy                       |
+| `ReferenceStack/StandaloneBucket/Policy/Resource`                                                                                             | AWS::S3::BucketPolicy                       |
+| `ReferenceStack/CuiDatabase/SecurityGroup/from ReferenceStackCuiDatabaseInstanceRotationSingleUserSecurityGroupA866EE31:{IndirectPort}`       | AWS::EC2::SecurityGroupIngress              |
+| `ReferenceStack/CuiDatabase/Instance/Secret/Attachment/Resource`                                                                              | AWS::SecretsManager::SecretTargetAttachment |
+| `ReferenceStack/CuiDatabase/Instance/Secret/Attachment/RotationSchedule/Resource`                                                             | AWS::SecretsManager::RotationSchedule       |
+| `ReferenceStack/CuiDatabase/Instance/Secret/Attachment/Policy/Resource`                                                                       | AWS::SecretsManager::ResourcePolicy         |
+| `ReferenceStack/CuiDatabase/BackupVault/Resource`                                                                                             | AWS::Backup::BackupVault                    |
+| `ReferenceStack/CuiDatabase/BackupPlan/Resource`                                                                                              | AWS::Backup::BackupPlan                     |
+| `ReferenceStack/CuiDatabase/BackupPlan/BackupSelection/Resource`                                                                              | AWS::Backup::BackupSelection                |
+| `ReferenceStack/StandaloneDatabase/SecurityGroup/from ReferenceStackStandaloneDatabaseRotationSingleUserSecurityGroup152FEEBA:{IndirectPort}` | AWS::EC2::SecurityGroupIngress              |
+| `ReferenceStack/StandaloneDatabase/Secret/Attachment/Resource`                                                                                | AWS::SecretsManager::SecretTargetAttachment |
+| `ReferenceStack/StandaloneDatabase/Secret/Attachment/RotationSchedule/Resource`                                                               | AWS::SecretsManager::RotationSchedule       |
+| `ReferenceStack/StandaloneDatabase/Secret/Attachment/Policy/Resource`                                                                         | AWS::SecretsManager::ResourcePolicy         |
 
 ## Outstanding cdk-nag findings
 
-| Rule                             | Resources                                      |
-| -------------------------------- | ---------------------------------------------- |
-| `NIST.800.53.R5-EFSInBackupPlan` | `ReferenceStack/StandaloneFileSystem/Resource` |
+| Rule                                        | Resources                                                                                                                                                                                                                                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NIST.800.53.R5-EFSInBackupPlan`            | `ReferenceStack/StandaloneFileSystem/Resource`                                                                                                                                                                                                                                         |
+| `NIST.800.53.R5-S3BucketReplicationEnabled` | `ReferenceStack/CuiBucket/AccessLogs/Resource`, `ReferenceStack/CuiBucket/Bucket/Resource`, `ReferenceStack/StandaloneBucket/Resource`                                                                                                                                                 |
+| `NIST.800.53.R5-EC2RestrictedCommonPorts`   | `ReferenceStack/CuiDatabase/SecurityGroup/from ReferenceStackCuiDatabaseInstanceRotationSingleUserSecurityGroupA866EE31:{IndirectPort}`, `ReferenceStack/StandaloneDatabase/SecurityGroup/from ReferenceStackStandaloneDatabaseRotationSingleUserSecurityGroup152FEEBA:{IndirectPort}` |
+| `NIST.800.53.R5-EC2RestrictedSSH`           | `ReferenceStack/CuiDatabase/SecurityGroup/from ReferenceStackCuiDatabaseInstanceRotationSingleUserSecurityGroupA866EE31:{IndirectPort}`, `ReferenceStack/StandaloneDatabase/SecurityGroup/from ReferenceStackStandaloneDatabaseRotationSingleUserSecurityGroup152FEEBA:{IndirectPort}` |
+| `NIST.800.53.R5-RDSInBackupPlan`            | `ReferenceStack/StandaloneDatabase/Resource`                                                                                                                                                                                                                                           |
+| `NIST.800.53.R5-RDSMultiAZSupport`          | `ReferenceStack/StandaloneDatabase/Resource`                                                                                                                                                                                                                                           |
