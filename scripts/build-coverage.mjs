@@ -29,7 +29,10 @@ const dynamodb = await import('aws-cdk-lib/aws-dynamodb')
 const lambda = await import('aws-cdk-lib/aws-lambda')
 
 const { CompliantStack } = await import('../dist/cmmc2/index.mjs')
-const { SecurityGroup } = await import('../dist/cmmc2/aws-ec2/index.mjs')
+const { SecurityGroup, Vpc } = await import('../dist/cmmc2/aws-ec2/index.mjs')
+const { Cluster, FargateService, FargateTaskDefinition } =
+  await import('../dist/cmmc2/aws-ecs/index.mjs')
+const ecs = await import('aws-cdk-lib/aws-ecs')
 const { Key } = await import('../dist/cmmc2/aws-kms/index.mjs')
 const { LogGroup } = await import('../dist/cmmc2/aws-logs/index.mjs')
 const { Secret } = await import('../dist/cmmc2/aws-secretsmanager/index.mjs')
@@ -135,6 +138,19 @@ function referenceApp() {
   new Table(stack, 'Records', {
     partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
   })
+  const realVpc = new Vpc(stack, 'Network', { maxAzs: 2 })
+  const cluster = new Cluster(stack, 'Cluster', { vpc: realVpc })
+  const taskLogs = new LogGroup(stack, 'TaskLogs')
+  const taskDefinition = new FargateTaskDefinition(stack, 'TaskDefinition', {
+    cpu: 256,
+    memoryLimitMiB: 512,
+  })
+  taskDefinition.addComplianceContainer('app', {
+    image: ecs.ContainerImage.fromRegistry('public.ecr.aws/nginx/nginx:latest'),
+    logging: ecs.LogDrivers.awsLogs({ streamPrefix: 'app', logGroup: taskLogs }),
+  })
+  new FargateService(stack, 'Service', { cluster, taskDefinition })
+
   const serviceLogs = new ServiceLogBucket(stack, 'ServiceLogs', {
     bucketName: 'reference-service-logs',
   })

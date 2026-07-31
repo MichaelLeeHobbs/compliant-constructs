@@ -91,6 +91,11 @@
       "import": "./dist/cmmc2/aws-ec2/index.mjs",
       "require": "./dist/cmmc2/aws-ec2/index.js"
     },
+    "./cmmc2/aws-ecs": {
+      "types": "./dist/cmmc2/aws-ecs/index.d.ts",
+      "import": "./dist/cmmc2/aws-ecs/index.mjs",
+      "require": "./dist/cmmc2/aws-ecs/index.js"
+    },
     "./cmmc2/aws-efs": {
       "types": "./dist/cmmc2/aws-efs/index.d.ts",
       "import": "./dist/cmmc2/aws-efs/index.mjs",

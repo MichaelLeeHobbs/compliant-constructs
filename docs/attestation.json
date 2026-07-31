@@ -132,6 +132,17 @@
             ],
             "caveat": "Blocks the specific mistake of exposing SSH or RDP to 0.0.0.0/0. Flow control for CUI depends on the whole rule set, not on one prohibited case."
           }
+        },
+        {
+          "path": "ReferenceStack/Service",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.3",
+            "satisfaction": "partial",
+            "evidence": "AssignPublicIp=false, so tasks are not directly addressable from the internet",
+            "caveat": "Removes direct inbound reachability. Flow control still depends on the security groups and subnets the service runs in."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -518,6 +529,53 @@
           }
         },
         {
+          "path": "ReferenceStack/Network",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Flow logs for ALL traffic delivered to an encrypted CloudWatch log group",
+            "nagRuleIds": [
+              "NIST.800.53.R5-VPCFlowLogsEnabled"
+            ],
+            "caveat": "Records connection metadata - addresses, ports, bytes, accept or reject. It does not record payloads, so it will not tell you what was transferred."
+          }
+        },
+        {
+          "path": "ReferenceStack/Network/FlowLogGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Log group retained for 1 year (default)",
+            "caveat": "Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs."
+          }
+        },
+        {
+          "path": "ReferenceStack/TaskLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Log group retained for 1 year (default)",
+            "caveat": "Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs."
+          }
+        },
+        {
+          "path": "ReferenceStack/TaskDefinition/app",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Container has a log driver configured",
+            "caveat": "Captures what the process writes to stdout and stderr. Whether that is enough to investigate unauthorised activity is a property of the application."
+          }
+        },
+        {
           "path": "ReferenceStack/Alb",
           "claim": {
             "framework": "cmmc2",
@@ -686,6 +744,34 @@
       "claims": [
         {
           "path": "ReferenceStack/ApplicationLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.8",
+            "satisfaction": "partial",
+            "evidence": "Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern."
+          }
+        },
+        {
+          "path": "ReferenceStack/Network/FlowLogGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.8",
+            "satisfaction": "partial",
+            "evidence": "Encrypted at rest with a customer-managed key; the key policy grants CloudWatch Logs only within this account and region",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Protects records at rest from readers without key access. Does not prevent deletion by a principal holding logs:DeleteLogGroup - that is an IAM concern."
+          }
+        },
+        {
+          "path": "ReferenceStack/TaskLogs",
           "claim": {
             "framework": "cmmc2",
             "frameworkRevision": "rev2",
@@ -907,7 +993,20 @@
         "nist800171": "3.4.6",
         "title": "Employ the principle of least functionality by configuring organizational systems to provide only essential capabilities."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/TaskDefinition/app",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "CM.L2-3.4.6",
+            "satisfaction": "partial",
+            "evidence": "ReadonlyRootFilesystem=true and Privileged=false",
+            "caveat": "Removes write access to the image layer and host-level privilege. The packages inside the image, and what the process is allowed to reach over the network, are elsewhere."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -1741,7 +1840,20 @@
         "nist800171": "3.13.5",
         "title": "Implement subnetworks for publicly accessible system components that are physically or logically separated from internal networks."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/Network",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.5",
+            "satisfaction": "partial",
+            "evidence": "Subnet tiers separate publicly reachable components from internal ones",
+            "caveat": "Provides the separation only if the caller places workloads in the right tier. This construct builds the boundary; it does not police what crosses it."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -1786,6 +1898,21 @@
             "satisfaction": "partial",
             "evidence": "Created with allowAllOutbound=false and allowAllIpv6Outbound=false",
             "caveat": "Establishes deny-by-default at this security group. Rules added afterwards, network ACLs, and any other path into the subnet are outside its scope."
+          }
+        },
+        {
+          "path": "ReferenceStack/Network",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.6",
+            "satisfaction": "partial",
+            "evidence": "Default security group stripped of all rules; public subnets do not auto-assign public IP addresses",
+            "nagRuleIds": [
+              "NIST.800.53.R5-VPCDefaultSecurityGroupClosed",
+              "NIST.800.53.R5-VPCSubnetAutoAssignPublicIpDisabled"
+            ],
+            "caveat": "Closes the two defaults that grant connectivity nobody asked for. The security groups actually attached to workloads are the caller’s to write."
           }
         }
       ],
@@ -2251,6 +2378,34 @@
           }
         },
         {
+          "path": "ReferenceStack/Network/FlowLogGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "supporting",
+            "evidence": "KmsKeyId set to a customer-managed key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Applies to log data only, and only to records written after the key was attached."
+          }
+        },
+        {
+          "path": "ReferenceStack/TaskLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "supporting",
+            "evidence": "KmsKeyId set to a customer-managed key",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudWatchLogGroupEncrypted"
+            ],
+            "caveat": "Applies to log data only, and only to records written after the key was attached."
+          }
+        },
+        {
           "path": "ReferenceStack/TrailLogs",
           "claim": {
             "framework": "cmmc2",
@@ -2398,7 +2553,20 @@
         "nist800171": "3.14.6",
         "title": "Monitor organizational systems, including inbound and outbound communications traffic, to detect attacks and indicators of potential attacks."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/Cluster",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SI.L2-3.14.6",
+            "satisfaction": "supporting",
+            "evidence": "Container Insights enabled, emitting task and container level metrics",
+            "caveat": "Produces the telemetry. Monitoring for attacks means someone alerting on it, which is not something a cluster can do for you."
+          }
+        }
+      ],
+      "satisfaction": "supporting"
     },
     {
       "practice": {
@@ -2520,6 +2688,62 @@
       "cfnType": "AWS::DynamoDB::GlobalTable"
     },
     {
+      "path": "ReferenceStack/Network/PublicSubnet1/RouteTableAssociation",
+      "cfnType": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    {
+      "path": "ReferenceStack/Network/PublicSubnet1/DefaultRoute",
+      "cfnType": "AWS::EC2::Route"
+    },
+    {
+      "path": "ReferenceStack/Network/PublicSubnet2/RouteTableAssociation",
+      "cfnType": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    {
+      "path": "ReferenceStack/Network/PublicSubnet2/DefaultRoute",
+      "cfnType": "AWS::EC2::Route"
+    },
+    {
+      "path": "ReferenceStack/Network/PrivateSubnet1/RouteTableAssociation",
+      "cfnType": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    {
+      "path": "ReferenceStack/Network/PrivateSubnet1/DefaultRoute",
+      "cfnType": "AWS::EC2::Route"
+    },
+    {
+      "path": "ReferenceStack/Network/PrivateSubnet2/RouteTableAssociation",
+      "cfnType": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    {
+      "path": "ReferenceStack/Network/PrivateSubnet2/DefaultRoute",
+      "cfnType": "AWS::EC2::Route"
+    },
+    {
+      "path": "ReferenceStack/Network/VPCGW",
+      "cfnType": "AWS::EC2::VPCGatewayAttachment"
+    },
+    {
+      "path": "ReferenceStack/Network/RestrictDefaultSecurityGroupCustomResource/Default",
+      "cfnType": "Custom::VpcRestrictDefaultSG"
+    },
+    {
+      "path": "ReferenceStack/Network/FlowLog/IAMRole/DefaultPolicy/Resource",
+      "cfnType": "AWS::IAM::Policy"
+    },
+    {
+      "path": "ReferenceStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role",
+      "cfnType": "AWS::IAM::Role"
+    },
+    {
+      "path": "ReferenceStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
+      "cfnType": "AWS::Lambda::Function"
+    },
+    {
+      "path": "ReferenceStack/TaskDefinition/ExecutionRole/DefaultPolicy/Resource",
+      "cfnType": "AWS::IAM::Policy"
+    },
+    {
       "path": "ReferenceStack/ServiceLogs/Bucket/Policy/Resource",
       "cfnType": "AWS::S3::BucketPolicy"
     },
@@ -2592,6 +2816,24 @@
       ]
     },
     {
+      "ruleId": "NIST.800.53.R5-VPCNoUnrestrictedRouteToIGW",
+      "description": "The route table may contain one or more unrestricted route(s) to an IGW ('0.0.0.0/0' or '::/0') - (Control IDs: AC-4(21), CM-7b). Ensure Amazon EC2 route tables do not have unrestricted routes to an internet gateway. Removing or limiting the access to the internet for workloads within Amazon VPCs can reduce unintended access within your environment.",
+      "resources": [
+        "ReferenceStack/Network/PublicSubnet1/DefaultRoute",
+        "ReferenceStack/Network/PublicSubnet2/DefaultRoute"
+      ]
+    },
+    {
+      "ruleId": "NIST.800.53.R5-IAMNoInlinePolicy",
+      "description": "The IAM Group, User, or Role contains an inline policy - (Control IDs: AC-2i.2, AC-2(1), AC-2(6), AC-3, AC-3(3)(a), AC-3(3)(b)(1), AC-3(3)(b)(2), AC-3(3)(b)(3), AC-3(3)(b)(4), AC-3(3)(b)(5), AC-3(3)(c), AC-3(3), AC-3(4)(a), AC-3(4)(b), AC-3(4)(c), AC-3(4)(d), AC-3(4)(e), AC-3(4), AC-3(7), AC-3(8), AC-3(12)(a), AC-3(13), AC-3(15)(a), AC-3(15)(b), AC-4(28), AC-6, AC-6(3), AC-24, CM-5(1)(a), CM-6a, CM-9b, MP-2, SC-23(3)). AWS recommends to use managed policies instead of inline policies. The managed policies allow reusability, versioning and rolling back, and delegating permissions management.",
+      "resources": [
+        "ReferenceStack/Network/FlowLog/IAMRole/DefaultPolicy/Resource",
+        "ReferenceStack/TaskDefinition/ExecutionRole/DefaultPolicy/Resource",
+        "ReferenceStack/Trail/LogsRole/DefaultPolicy/Resource",
+        "ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource"
+      ]
+    },
+    {
       "ruleId": "NIST.800.53.R5-S3BucketLoggingEnabled",
       "description": "The S3 Buckets does not have server access logs enabled - (Control IDs: AC-2(4), AC-3(1), AC-3(10), AC-4(26), AC-6(9), AU-2b, AU-3a, AU-3b, AU-3c, AU-3d, AU-3e, AU-3f, AU-6(3), AU-6(4), AU-6(6), AU-6(9), AU-8b, AU-10, AU-12a, AU-12c, AU-12(1), AU-12(2), AU-12(3), AU-12(4), AU-14a, AU-14b, AU-14b, AU-14(3), CA-7b, CM-5(1)(b), CM-6a, CM-9b, IA-3(3)(b), MA-4(1)(a), PM-14a.1, PM-14b, PM-31, SC-7(9)(b), SI-1(1)(c), SI-3(8)(b), SI-4(2), SI-4(17), SI-4(20), SI-7(8), SI-10(1)(c)). Amazon Simple Storage Service (Amazon S3) server access logging provides a method to monitor the network for potential cybersecurity events. The events are monitored by capturing detailed records for the requests that are made to an Amazon S3 bucket. Each access log record provides details about a single access request. The details include the requester, bucket name, request time, request action, response status, and an error code, if relevant.",
       "resources": [
@@ -2610,14 +2852,6 @@
       "description": "The ALB is not associated with AWS WAFv2 web ACL - (Control ID: AC-4(21)). A WAF helps to protect your web applications or APIs against common web exploits. These web exploits may affect availability, compromise security, or consume excessive resources within your environment.",
       "resources": [
         "ReferenceStack/Alb/Resource"
-      ]
-    },
-    {
-      "ruleId": "NIST.800.53.R5-IAMNoInlinePolicy",
-      "description": "The IAM Group, User, or Role contains an inline policy - (Control IDs: AC-2i.2, AC-2(1), AC-2(6), AC-3, AC-3(3)(a), AC-3(3)(b)(1), AC-3(3)(b)(2), AC-3(3)(b)(3), AC-3(3)(b)(4), AC-3(3)(b)(5), AC-3(3)(c), AC-3(3), AC-3(4)(a), AC-3(4)(b), AC-3(4)(c), AC-3(4)(d), AC-3(4)(e), AC-3(4), AC-3(7), AC-3(8), AC-3(12)(a), AC-3(13), AC-3(15)(a), AC-3(15)(b), AC-4(28), AC-6, AC-6(3), AC-24, CM-5(1)(a), CM-6a, CM-9b, MP-2, SC-23(3)). AWS recommends to use managed policies instead of inline policies. The managed policies allow reusability, versioning and rolling back, and delegating permissions management.",
-      "resources": [
-        "ReferenceStack/Trail/LogsRole/DefaultPolicy/Resource",
-        "ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource"
       ]
     },
     {

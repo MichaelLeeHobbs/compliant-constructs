@@ -14,6 +14,7 @@ export default defineConfig({
     'src/cmmc2/aws-cloudtrail/index.ts',
     'src/cmmc2/aws-dynamodb/index.ts',
     'src/cmmc2/aws-ec2/index.ts',
+    'src/cmmc2/aws-ecs/index.ts',
     'src/cmmc2/aws-efs/index.ts',
     'src/cmmc2/aws-elasticloadbalancingv2/index.ts',
     'src/cmmc2/aws-kms/index.ts',
