@@ -56,6 +56,13 @@ export interface TrailProps extends Omit<cloudtrail.TrailProps, MandatedProps> {
  * record of who did what to any of the other resources in this library, so the
  * defaults here are deliberately unyielding: a single-region trail with no file
  * validation is close to useless as evidence.
+ *
+ * **One cdk-nag finding is outstanding and structural.** Delivering to
+ * CloudWatch makes the CDK create a role for the purpose, and it attaches the
+ * log-write permissions as an inline policy - so `IAMNoInlinePolicy` fires
+ * against `Trail/LogsRole/DefaultPolicy`. Avoiding it would mean reimplementing
+ * `cloudtrail.Trail`, and the alternative of not delivering to CloudWatch would
+ * trade a real control for a clean report.
  */
 export class Trail extends cloudtrail.Trail {
   constructor(scope: Construct, id: string, props: TrailProps) {

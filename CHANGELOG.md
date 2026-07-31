@@ -95,6 +95,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   express - and the eleven rules the constructs follow, from how to rank a mandate through to
   pinning outstanding findings and attacking your own guarantees.
 
+- `cmmc2/aws-securityhub` - `Hub`, enabling Security Hub with NIST 800-53 Rev 5 always on, plus
+  AWS Foundational and CIS v3 by default. Standard ARNs resolve per partition.
+- `cmmc2/aws-guardduty` - `Detector`, enabled, with the six-hour publishing frequency removed
+  from the type.
+- `cmmc2/aws-config` - `ConfigurationRecorder`, recording every supported resource type including
+  global ones, with the bucket policy AWS Config needs in order to deliver at all.
+- `cmmc2/patterns` - `AccountBaseline`, composing CloudTrail, Config, Security Hub and GuardDuty.
+  This is what moves the CA and RA domains off zero: no amount of correct resource configuration
+  answers whether security controls are monitored on an ongoing basis.
+
 ### Fixed
 
 - **`SecurityGroup` let `Port.allTraffic()` through from `0.0.0.0/0`.** That port shape emits

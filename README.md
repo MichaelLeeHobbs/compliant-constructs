@@ -60,13 +60,13 @@ metadata that drives the constructs, so it cannot drift into overclaiming.
 
 <!-- compliant-constructs:coverage:start -->
 
-**16 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
+**22 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
 
 | Domain                                    | Addressed | Total   |
 | ----------------------------------------- | --------- | ------- |
 | AC - Access Control                       | 1         | 22      |
 | AT - Awareness and Training               | 0         | 3       |
-| AU - Audit and Accountability             | 3         | 9       |
+| AU - Audit and Accountability             | 4         | 9       |
 | CM - Configuration Management             | 2         | 9       |
 | IA - Identification and Authentication    | 2         | 11      |
 | IR - Incident Response                    | 0         | 3       |
@@ -74,11 +74,11 @@ metadata that drives the constructs, so it cannot drift into overclaiming.
 | MP - Media Protection                     | 1         | 9       |
 | PS - Personnel Security                   | 0         | 2       |
 | PE - Physical Protection                  | 0         | 6       |
-| RA - Risk Assessment                      | 0         | 3       |
-| CA - Security Assessment                  | 0         | 4       |
+| RA - Risk Assessment                      | 2         | 3       |
+| CA - Security Assessment                  | 2         | 4       |
 | SC - System and Communications Protection | 5         | 16      |
-| SI - System and Information Integrity     | 2         | 7       |
-| **Total**                                 | **16**    | **110** |
+| SI - System and Information Integrity     | 3         | 7       |
+| **Total**                                 | **22**    | **110** |
 
 <!-- compliant-constructs:coverage:end -->
 
@@ -125,6 +125,7 @@ suppressed - so a future cdk-nag rule fails the build here instead of surfacing 
 | `SecureBucket`, `Bucket`                        | `S3BucketReplicationEnabled`                   | satisfying it means a second bucket and a replication role - doubled storage cost, and for CUI in GovCloud a data-residency decision we will not make silently |
 | `EncryptedDatabaseInstance`, `DatabaseInstance` | `EC2RestrictedCommonPorts`, `EC2RestrictedSSH` | false positives: credential rotation attaches an ingress rule whose port is an unresolved `Fn::GetAtt`, which cdk-nag cannot prove is not 22 or 3389           |
 | `DatabaseInstance`                              | also `RDSInBackupPlan`                         | as above; use `EncryptedDatabaseInstance`                                                                                                                      |
+| `Trail`                                         | `IAMNoInlinePolicy`                            | structural: the role CDK creates inside `cloudtrail.Trail` for CloudWatch delivery uses an inline policy                                                       |
 
 The RDS pair is worth dwelling on. We could clear those two findings by defaulting credential
 rotation off - and that would trade a real control for a cosmetic one, so it is not on offer.
@@ -159,26 +160,29 @@ remedies. Silently inventing a key would quietly undo the guarantee that made it
 
 ## Modules
 
-| Import                             | Contains                                                                                                 |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `cmmc2`                            | `CompliantStack`, the practice catalog, `cmmc2Claim()`                                                   |
-| `cmmc2/aws-cloudtrail`             | `Trail`                                                                                                  |
-| `cmmc2/aws-dynamodb`               | `Table`                                                                                                  |
-| `cmmc2/aws-ec2`                    | `Vpc`, `SecurityGroup`                                                                                   |
-| `cmmc2/aws-ecs`                    | `Cluster`, `FargateTaskDefinition`, `FargateService`                                                     |
-| `cmmc2/aws-efs`                    | `FileSystem`                                                                                             |
-| `cmmc2/aws-elasticloadbalancingv2` | `ApplicationLoadBalancer`                                                                                |
-| `cmmc2/aws-kms`                    | `Key`                                                                                                    |
-| `cmmc2/aws-lambda`                 | `Function`                                                                                               |
-| `cmmc2/aws-logs`                   | `LogGroup`                                                                                               |
-| `cmmc2/aws-rds`                    | `DatabaseInstance`                                                                                       |
-| `cmmc2/aws-s3`                     | `Bucket`                                                                                                 |
-| `cmmc2/aws-secretsmanager`         | `Secret`                                                                                                 |
-| `cmmc2/aws-sns`                    | `Topic`                                                                                                  |
-| `cmmc2/aws-sqs`                    | `Queue`                                                                                                  |
-| `cmmc2/patterns`                   | `EncryptedFileSystem`, `SecureBucket`, `EncryptedDatabaseInstance`, `SecureFunction`, `ServiceLogBucket` |
-| `verify`                           | `verifyCompliance()` (needs the optional `cdk-nag` peer)                                                 |
-| `report`                           | `writeAttestation()` and the renderers                                                                   |
+| Import                             | Contains                                                                                                                    |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `cmmc2`                            | `CompliantStack`, the practice catalog, `cmmc2Claim()`                                                                      |
+| `cmmc2/aws-cloudtrail`             | `Trail`                                                                                                                     |
+| `cmmc2/aws-config`                 | `ConfigurationRecorder`                                                                                                     |
+| `cmmc2/aws-dynamodb`               | `Table`                                                                                                                     |
+| `cmmc2/aws-ec2`                    | `Vpc`, `SecurityGroup`                                                                                                      |
+| `cmmc2/aws-ecs`                    | `Cluster`, `FargateTaskDefinition`, `FargateService`                                                                        |
+| `cmmc2/aws-efs`                    | `FileSystem`                                                                                                                |
+| `cmmc2/aws-elasticloadbalancingv2` | `ApplicationLoadBalancer`                                                                                                   |
+| `cmmc2/aws-guardduty`              | `Detector`                                                                                                                  |
+| `cmmc2/aws-kms`                    | `Key`                                                                                                                       |
+| `cmmc2/aws-lambda`                 | `Function`                                                                                                                  |
+| `cmmc2/aws-logs`                   | `LogGroup`                                                                                                                  |
+| `cmmc2/aws-rds`                    | `DatabaseInstance`                                                                                                          |
+| `cmmc2/aws-s3`                     | `Bucket`                                                                                                                    |
+| `cmmc2/aws-secretsmanager`         | `Secret`                                                                                                                    |
+| `cmmc2/aws-securityhub`            | `Hub`                                                                                                                       |
+| `cmmc2/aws-sns`                    | `Topic`                                                                                                                     |
+| `cmmc2/aws-sqs`                    | `Queue`                                                                                                                     |
+| `cmmc2/patterns`                   | `AccountBaseline`, `EncryptedFileSystem`, `SecureBucket`, `EncryptedDatabaseInstance`, `SecureFunction`, `ServiceLogBucket` |
+| `verify`                           | `verifyCompliance()` (needs the optional `cdk-nag` peer)                                                                    |
+| `report`                           | `writeAttestation()` and the renderers                                                                                      |
 
 One constraint worth knowing: a compliant `Bucket` cannot receive another bucket's server access
 logs. `ObjectOwnership=BucketOwnerEnforced` disables ACLs, and CDK's log-delivery wiring sets one on
