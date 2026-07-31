@@ -43,11 +43,16 @@ const _ownPolicy: FileSystemProps = { ...base, fileSystemPolicy: undefined }
 
 // --- required props cannot be omitted ---
 
-// @ts-expect-error kmsKey is required, unlike in the CDK
-const _noKey: FileSystemProps = { vpc, vpcSubnets: { subnets: vpc.privateSubnets } }
-
 // @ts-expect-error vpcSubnets is required, unlike in the CDK
 const _noSubnets: FileSystemProps = { vpc, kmsKey }
+
+// --- the key may be omitted, but only because the stack supplies one ---
+
+// Omitting kmsKey is legal: it resolves to the CompliantStack's key at
+// construction. A customer-managed key is still always used - what changed is
+// whether the caller has to restate it. Using this outside a CompliantStack
+// throws, which is a runtime guarantee the type system cannot express.
+const _stackKey: FileSystemProps = { vpc, vpcSubnets: { subnets: vpc.privateSubnets } }
 
 // --- removal policy is narrowed to the values EFS actually accepts ---
 
@@ -90,7 +95,7 @@ void [
   _anonymous,
   _noBackups,
   _ownPolicy,
-  _noKey,
+  _stackKey,
   _noSubnets,
   _destroy,
   _snapshot,

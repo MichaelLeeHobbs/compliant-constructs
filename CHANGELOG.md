@@ -54,7 +54,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `SnapshottableRemovalPolicy`, alongside `NonDestructiveRemovalPolicy`. RDS accepts a `Snapshot`
   deletion policy where S3, EFS, KMS and Backup vaults do not, so the narrowing differs per resource.
 
+- `CompliantStack` now supplies a stack-scoped customer-managed key, created lazily on first use,
+  with `CompliantStack.of()` and `resolveEncryptionKey()` for constructs to reach it.
+
 ### Changed
+
+- **Encryption keys are now stack-scoped by default.** `kmsKey` / `encryptionKey` became optional on
+  every construct, resolving to the stack's key when omitted. A customer-managed key is still always
+  used; what changed is whether the caller has to restate it. Using a construct outside a
+  `CompliantStack` without an explicit key throws.
+- Patterns no longer mint a key each. They default to the stack key, so a stack with three patterns
+  has one key rather than three.
+- `BucketReference` accepts either `s3.IBucket` or `s3.Bucket`, absorbing an aws-cdk-lib typing
+  inconsistency (`isWebsite` is optional on the class, required on the interface) that otherwise
+  forces a cast on every caller compiling with `exactOptionalPropertyTypes`.
+
+### Fixed
+
+- `CompliantStack.of()` used `instanceof`, which fails across bundle boundaries: with code splitting
+  off, each published subpath carries its own copy of the class, so a stack from `cmmc2` was not
+  `instanceof` the class inside `cmmc2/patterns`. That broke the exact import combination the README
+  recommends. Now uses a `Symbol.for` marker, the same approach the CDK uses for `isConstruct`.
 
 - **Peer dependencies:** `aws-cdk-lib` floor raised to `^2.257.0`, and `cdk-nag` is now optional.
   cdk-nag v3 requires `aws-cdk-lib@^2.257.0`, so the previous `^2.165.0` floor combined with a

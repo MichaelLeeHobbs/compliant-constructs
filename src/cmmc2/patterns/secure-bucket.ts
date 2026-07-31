@@ -1,15 +1,24 @@
 import { RemovalPolicy } from 'aws-cdk-lib'
-import * as kms from 'aws-cdk-lib/aws-kms'
+import type * as kms from 'aws-cdk-lib/aws-kms'
 import * as s3 from 'aws-cdk-lib/aws-s3'
 import { Construct } from 'constructs'
 
 import { addControlClaims, type NonDestructiveRemovalPolicy } from '../../index.js'
-import { Bucket } from '../aws-s3/index.js'
+import { Bucket, type BucketReference } from '../aws-s3/index.js'
 import { cmmc2Claim } from '../index.js'
+import { resolveEncryptionKey } from '../stack.js'
 
 export interface SecureBucketProps {
   /** Bucket name. Must be lowercase. */
   readonly bucketName: string
+
+  /**
+   * Key for the bucket and its access-log bucket.
+   *
+   * Defaults to the stack key. Pass one where the bucket is shared with an
+   * outside party, or needs a key with its own revocation lifetime.
+   */
+  readonly encryptionKey?: kms.IKey
 
   /** Defaults to `RETAIN`. */
   readonly removalPolicy?: NonDestructiveRemovalPolicy
@@ -21,7 +30,7 @@ export interface SecureBucketProps {
    * destination is usually better - access records are easier to protect and
    * review in one place than scattered per-bucket.
    */
-  readonly serverAccessLogsBucket?: s3.IBucket
+  readonly serverAccessLogsBucket?: BucketReference
 
   /** Lifecycle rules for the data bucket. */
   readonly lifecycleRules?: s3.LifecycleRule[]
@@ -40,8 +49,8 @@ export interface SecureBucketProps {
  */
 export class SecureBucket extends Construct {
   readonly bucket: Bucket
-  readonly kmsKey: kms.Key
-  readonly serverAccessLogsBucket: s3.IBucket
+  readonly encryptionKey: kms.IKey
+  readonly serverAccessLogsBucket: BucketReference
 
   constructor(scope: Construct, id: string, props: SecureBucketProps) {
     super(scope, id)
@@ -52,22 +61,14 @@ export class SecureBucket extends Construct {
 
     const removalPolicy = props.removalPolicy ?? RemovalPolicy.RETAIN
 
-    this.kmsKey = new kms.Key(this, 'Key', {
-      description: `CUI encryption key for bucket ${props.bucketName}`,
-      enableKeyRotation: true,
-      removalPolicy,
-    })
+    this.encryptionKey = resolveEncryptionKey(scope, props.encryptionKey)
 
-    // The cast is aws-cdk-lib's typing, not ours: `Bucket` declares
-    // `isWebsite?: boolean` while `IBucket` declares it required, which only
-    // conflicts under exactOptionalPropertyTypes. A Bucket is an IBucket.
     this.serverAccessLogsBucket =
-      props.serverAccessLogsBucket ??
-      (this.createLogBucket(props.bucketName, removalPolicy) as s3.IBucket)
+      props.serverAccessLogsBucket ?? this.createLogBucket(props.bucketName, removalPolicy)
 
     this.bucket = new Bucket(this, 'Bucket', {
       bucketName: props.bucketName,
-      encryptionKey: this.kmsKey,
+      encryptionKey: this.encryptionKey,
       serverAccessLogsBucket: this.serverAccessLogsBucket,
       serverAccessLogsPrefix: `${props.bucketName}/`,
       removalPolicy,
@@ -96,7 +97,7 @@ export class SecureBucket extends Construct {
     return new s3.Bucket(this, 'AccessLogs', {
       bucketName: `${name}-access-logs`,
       encryption: s3.BucketEncryption.KMS,
-      encryptionKey: this.kmsKey,
+      encryptionKey: this.encryptionKey,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       enforceSSL: true,
       versioned: true,

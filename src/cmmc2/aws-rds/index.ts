@@ -5,6 +5,7 @@ import { type Construct } from 'constructs'
 
 import { addControlClaims, type SnapshottableRemovalPolicy } from '../../index.js'
 import { cmmc2Claim } from '../index.js'
+import { resolveEncryptionKey } from '../stack.js'
 
 export { type SnapshottableRemovalPolicy } from '../../index.js'
 
@@ -41,7 +42,7 @@ export interface DatabaseInstanceProps extends Omit<rds.DatabaseInstanceProps, M
    * Customer-managed key used for storage encryption, the generated
    * credentials secret, and Performance Insights. Required.
    */
-  readonly encryptionKey: kms.IKey
+  readonly encryptionKey?: kms.IKey
 
   /** Master username. Credentials are always a generated, CMK-encrypted secret. */
   readonly masterUsername: string
@@ -111,6 +112,7 @@ export class DatabaseInstance extends rds.DatabaseInstance {
     }
 
     const logExports = defaultLogExports(props.engine)
+    const encryptionKey = resolveEncryptionKey(scope, props.encryptionKey)
 
     super(scope, id, {
       // Spread conditionally: under exactOptionalPropertyTypes an explicit
@@ -120,16 +122,16 @@ export class DatabaseInstance extends rds.DatabaseInstance {
       ...props,
       backupRetention,
       credentials: rds.Credentials.fromGeneratedSecret(props.masterUsername, {
-        encryptionKey: props.encryptionKey,
+        encryptionKey,
       }),
       storageEncrypted: true,
-      storageEncryptionKey: props.encryptionKey,
+      storageEncryptionKey: encryptionKey,
       publiclyAccessible: false,
       deletionProtection: true,
       iamAuthentication: true,
       autoMinorVersionUpgrade: true,
       enablePerformanceInsights: true,
-      performanceInsightEncryptionKey: props.encryptionKey,
+      performanceInsightEncryptionKey: encryptionKey,
       copyTagsToSnapshot: true,
       monitoringInterval,
       removalPolicy: props.removalPolicy ?? RemovalPolicy.RETAIN,
