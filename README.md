@@ -51,15 +51,15 @@ metadata that drives the constructs, so it cannot drift into overclaiming.
 
 <!-- compliant-constructs:coverage:start -->
 
-**9 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
+**11 of 110** CMMC 2.0 Level 2 practices are addressed in part by this library. None are satisfied outright - see [`docs/coverage.md`](docs/coverage.md) for what each claim does and does not evidence.
 
 | Domain                                    | Addressed | Total   |
 | ----------------------------------------- | --------- | ------- |
 | AC - Access Control                       | 1         | 22      |
 | AT - Awareness and Training               | 0         | 3       |
-| AU - Audit and Accountability             | 1         | 9       |
+| AU - Audit and Accountability             | 2         | 9       |
 | CM - Configuration Management             | 1         | 9       |
-| IA - Identification and Authentication    | 1         | 11      |
+| IA - Identification and Authentication    | 2         | 11      |
 | IR - Incident Response                    | 0         | 3       |
 | MA - Maintenance                          | 0         | 6       |
 | MP - Media Protection                     | 1         | 9       |
@@ -69,7 +69,7 @@ metadata that drives the constructs, so it cannot drift into overclaiming.
 | CA - Security Assessment                  | 0         | 4       |
 | SC - System and Communications Protection | 4         | 16      |
 | SI - System and Information Integrity     | 0         | 7       |
-| **Total**                                 | **9**     | **110** |
+| **Total**                                 | **11**    | **110** |
 
 <!-- compliant-constructs:coverage:end -->
 
@@ -150,15 +150,19 @@ remedies. Silently inventing a key would quietly undo the guarantee that made it
 
 ## Modules
 
-| Import           | Contains                                                           |
-| ---------------- | ------------------------------------------------------------------ |
-| `cmmc2`          | `CompliantStack`, the practice catalog, `cmmc2Claim()`             |
-| `cmmc2/aws-efs`  | `FileSystem`                                                       |
-| `cmmc2/aws-s3`   | `Bucket`                                                           |
-| `cmmc2/aws-rds`  | `DatabaseInstance`                                                 |
-| `cmmc2/patterns` | `EncryptedFileSystem`, `SecureBucket`, `EncryptedDatabaseInstance` |
-| `verify`         | `verifyCompliance()` (needs the optional `cdk-nag` peer)           |
-| `report`         | `writeAttestation()` and the renderers                             |
+| Import                     | Contains                                                           |
+| -------------------------- | ------------------------------------------------------------------ |
+| `cmmc2`                    | `CompliantStack`, the practice catalog, `cmmc2Claim()`             |
+| `cmmc2/aws-ec2`            | `SecurityGroup`                                                    |
+| `cmmc2/aws-efs`            | `FileSystem`                                                       |
+| `cmmc2/aws-kms`            | `Key`                                                              |
+| `cmmc2/aws-logs`           | `LogGroup`                                                         |
+| `cmmc2/aws-rds`            | `DatabaseInstance`                                                 |
+| `cmmc2/aws-s3`             | `Bucket`                                                           |
+| `cmmc2/aws-secretsmanager` | `Secret`                                                           |
+| `cmmc2/patterns`           | `EncryptedFileSystem`, `SecureBucket`, `EncryptedDatabaseInstance` |
+| `verify`                   | `verifyCompliance()` (needs the optional `cdk-nag` peer)           |
+| `report`                   | `writeAttestation()` and the renderers                             |
 
 One constraint worth knowing: a compliant `Bucket` cannot receive another bucket's server access
 logs. `ObjectOwnership=BucketOwnerEnforced` disables ACLs, and CDK's log-delivery wiring sets one on

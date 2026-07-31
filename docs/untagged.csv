@@ -20,3 +20,5 @@ ReferenceStack/StandaloneDatabase/SecurityGroup/from ReferenceStackStandaloneDat
 ReferenceStack/StandaloneDatabase/Secret/Attachment/Resource,AWS::SecretsManager::SecretTargetAttachment,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/StandaloneDatabase/Secret/Attachment/RotationSchedule/Resource,AWS::SecretsManager::RotationSchedule,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/StandaloneDatabase/Secret/Attachment/Policy/Resource,AWS::SecretsManager::ResourcePolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/RotatedCredential/RotationSchedule/Resource,AWS::SecretsManager::RotationSchedule,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/RotatedCredential/Policy/Resource,AWS::SecretsManager::ResourcePolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it

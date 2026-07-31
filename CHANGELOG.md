@@ -57,6 +57,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `CompliantStack` now supplies a stack-scoped customer-managed key, created lazily on first use,
   with `CompliantStack.of()` and `resolveEncryptionKey()` for constructs to reach it.
 
+- `cmmc2/aws-kms` - `Key`, mandating annual rotation and a non-destructive removal policy.
+- `cmmc2/aws-logs` - `LogGroup`, mandating a customer-managed key and an explicit retention
+  period. Adds the CloudWatch Logs service statement to the key policy when it attaches, scoped by
+  an encryption-context condition, and only once per key per region.
+- `cmmc2/aws-secretsmanager` - `Secret`, mandating a customer-managed key, with optional hosted
+  rotation. The claim it records weakens when no rotation is configured.
+- `cmmc2/aws-ec2` - `SecurityGroup`, closed in both address families by default, requiring a
+  description, and refusing SSH or RDP ingress from `0.0.0.0/0` or `::/0`.
+
 ### Changed
 
 - **Encryption keys are now stack-scoped by default.** `kmsKey` / `encryptionKey` became optional on
