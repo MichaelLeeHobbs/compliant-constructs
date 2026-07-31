@@ -39,13 +39,13 @@ const { Secret } = await import('../dist/cmmc2/aws-secretsmanager/index.mjs')
 const { Queue } = await import('../dist/cmmc2/aws-sqs/index.mjs')
 const { Topic } = await import('../dist/cmmc2/aws-sns/index.mjs')
 const { Table } = await import('../dist/cmmc2/aws-dynamodb/index.mjs')
-const { Trail } = await import('../dist/cmmc2/aws-cloudtrail/index.mjs')
 const { ApplicationLoadBalancer } =
   await import('../dist/cmmc2/aws-elasticloadbalancingv2/index.mjs')
 const { FileSystem } = await import('../dist/cmmc2/aws-efs/index.mjs')
 const { Bucket } = await import('../dist/cmmc2/aws-s3/index.mjs')
 const { DatabaseInstance } = await import('../dist/cmmc2/aws-rds/index.mjs')
 const {
+  AccountBaseline,
   EncryptedDatabaseInstance,
   EncryptedFileSystem,
   SecureBucket,
@@ -151,6 +151,8 @@ function referenceApp() {
   })
   new FargateService(stack, 'Service', { cluster, taskDefinition })
 
+  new AccountBaseline(stack, 'AccountBaseline', { name: 'reference' })
+
   const serviceLogs = new ServiceLogBucket(stack, 'ServiceLogs', {
     bucketName: 'reference-service-logs',
   })
@@ -159,11 +161,6 @@ function referenceApp() {
     internetFacing: false,
     accessLogsBucket: serviceLogs.bucket,
   })
-  new Trail(stack, 'Trail', {
-    bucket: cuiBucket.bucket,
-    cloudWatchLogGroup: new LogGroup(stack, 'TrailLogs'),
-  })
-
   new SecureFunction(stack, 'Processor', {
     runtime: lambda.Runtime.NODEJS_22_X,
     handler: 'index.handler',

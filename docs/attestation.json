@@ -143,6 +143,20 @@
             "evidence": "AssignPublicIp=false, so tasks are not directly addressable from the internet",
             "caveat": "Removes direct inbound reachability. Flow control still depends on the security groups and subnets the service runs in."
           }
+        },
+        {
+          "path": "ReferenceStack/AccountBaseline/AuditBucket/Bucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AC.L2-3.1.3",
+            "satisfaction": "partial",
+            "evidence": "BlockPublicAcls, BlockPublicPolicy, IgnorePublicAcls and RestrictPublicBuckets all true; ObjectOwnership=BucketOwnerEnforced disables ACLs entirely",
+            "nagRuleIds": [
+              "NIST.800.53.R5-S3BucketPublicReadProhibited"
+            ],
+            "caveat": "Prevents public exposure. Authorised access between principals is governed by IAM and the bucket policy, which the caller supplies."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -576,6 +590,70 @@
           }
         },
         {
+          "path": "ReferenceStack/AccountBaseline/AuditBucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Server access logs delivered to a dedicated bucket that is itself encrypted with a customer-managed key and blocks public access",
+            "nagRuleIds": [
+              "NIST.800.53.R5-S3DefaultEncryptionKMS"
+            ],
+            "caveat": "Evidences that access records exist and are protected. Their retention and review remain process controls."
+          }
+        },
+        {
+          "path": "ReferenceStack/AccountBaseline/AuditBucket/Bucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Server access logging enabled to a separate bucket",
+            "nagRuleIds": [
+              "NIST.800.53.R5-S3BucketLoggingEnabled"
+            ],
+            "caveat": "Records object-level access to this bucket only. Retention and review of those logs are properties of the destination bucket and of process, not of this resource."
+          }
+        },
+        {
+          "path": "ReferenceStack/AccountBaseline/TrailLogGroup",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Log group retained for 1 year (default)",
+            "caveat": "Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs."
+          }
+        },
+        {
+          "path": "ReferenceStack/AccountBaseline/Trail",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "partial",
+            "evidence": "Multi-region trail including global service events, delivered to both S3 and a named CloudWatch log group",
+            "nagRuleIds": [
+              "NIST.800.53.R5-CloudTrailCloudWatchLogsEnabled"
+            ],
+            "caveat": "Records management-plane activity. Data-plane events (S3 object access, Lambda invocations) are only captured if event selectors are configured for them."
+          }
+        },
+        {
+          "path": "ReferenceStack/AccountBaseline/ConfigRecorder",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.1",
+            "satisfaction": "supporting",
+            "evidence": "Configuration history delivered to S3 and optionally announced on SNS",
+            "caveat": "A record of configuration state over time. It is not an activity log - who made a change is in CloudTrail."
+          }
+        },
+        {
           "path": "ReferenceStack/Alb",
           "claim": {
             "framework": "cmmc2",
@@ -587,31 +665,6 @@
               "NIST.800.53.R5-ELBLoggingEnabled"
             ],
             "caveat": "Records requests reaching the load balancer. Requests handled entirely by a backend, or arriving by another path, are not captured here."
-          }
-        },
-        {
-          "path": "ReferenceStack/TrailLogs",
-          "claim": {
-            "framework": "cmmc2",
-            "frameworkRevision": "rev2",
-            "controlId": "AU.L2-3.3.1",
-            "satisfaction": "partial",
-            "evidence": "Log group retained for 1 year (default)",
-            "caveat": "Retains whatever is written to it. Whether the records are sufficient to investigate unauthorised activity depends on what the emitting service logs."
-          }
-        },
-        {
-          "path": "ReferenceStack/Trail",
-          "claim": {
-            "framework": "cmmc2",
-            "frameworkRevision": "rev2",
-            "controlId": "AU.L2-3.3.1",
-            "satisfaction": "partial",
-            "evidence": "Multi-region trail including global service events, delivered to both S3 and a named CloudWatch log group",
-            "nagRuleIds": [
-              "NIST.800.53.R5-CloudTrailCloudWatchLogsEnabled"
-            ],
-            "caveat": "Records management-plane activity. Data-plane events (S3 object access, Lambda invocations) are only captured if event selectors are configured for them."
           }
         },
         {
@@ -652,7 +705,7 @@
       },
       "claims": [
         {
-          "path": "ReferenceStack/Trail",
+          "path": "ReferenceStack/AccountBaseline/Trail",
           "claim": {
             "framework": "cmmc2",
             "frameworkRevision": "rev2",
@@ -702,7 +755,20 @@
         "nist800171": "3.3.5",
         "title": "Correlate audit record review, analysis, and reporting processes for investigation and response to indications of unlawful, unauthorized, suspicious, or unusual activity."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/AccountBaseline",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.5",
+            "satisfaction": "partial",
+            "evidence": "CloudTrail, Config and GuardDuty findings all reach Security Hub, giving one place where activity, configuration state and threat detections can be correlated",
+            "caveat": "Puts the records in one place and in a common format. Correlating them for an actual investigation is analysis, and nobody has automated that."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -785,18 +851,7 @@
           }
         },
         {
-          "path": "ReferenceStack/ServiceLogs",
-          "claim": {
-            "framework": "cmmc2",
-            "frameworkRevision": "rev2",
-            "controlId": "AU.L2-3.3.8",
-            "satisfaction": "partial",
-            "evidence": "Log destination is encrypted at rest with SSE-S3, blocks all public access, and requires TLS; versioning is on so a delivered object cannot be silently replaced",
-            "caveat": "Encryption uses AWS-managed keys, not a customer-managed key, because ELB and several other services cannot deliver logs to a KMS-encrypted bucket. Key custody for these records therefore sits with AWS."
-          }
-        },
-        {
-          "path": "ReferenceStack/TrailLogs",
+          "path": "ReferenceStack/AccountBaseline/TrailLogGroup",
           "claim": {
             "framework": "cmmc2",
             "frameworkRevision": "rev2",
@@ -810,7 +865,7 @@
           }
         },
         {
-          "path": "ReferenceStack/Trail",
+          "path": "ReferenceStack/AccountBaseline/Trail",
           "claim": {
             "framework": "cmmc2",
             "frameworkRevision": "rev2",
@@ -822,6 +877,17 @@
               "NIST.800.53.R5-CloudTrailEncryptionEnabled"
             ],
             "caveat": "Digest files make tampering detectable after the fact. They do not make it impossible - that needs S3 Object Lock on the destination bucket."
+          }
+        },
+        {
+          "path": "ReferenceStack/ServiceLogs",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "AU.L2-3.3.8",
+            "satisfaction": "partial",
+            "evidence": "Log destination is encrypted at rest with SSE-S3, blocks all public access, and requires TLS; versioning is on so a delivered object cannot be silently replaced",
+            "caveat": "Encryption uses AWS-managed keys, not a customer-managed key, because ELB and several other services cannot deliver logs to a KMS-encrypted bucket. Key custody for these records therefore sits with AWS."
           }
         },
         {
@@ -903,6 +969,17 @@
           }
         },
         {
+          "path": "ReferenceStack/AccountBaseline/ConfigRecorder",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "CM.L2-3.4.1",
+            "satisfaction": "partial",
+            "evidence": "Continuous inventory of deployed resources and their configuration, retained in S3",
+            "caveat": "Produces the inventory a baseline is measured against. It does not define the baseline or detect deviation from it unless Config rules are attached."
+          }
+        },
+        {
           "path": "ReferenceStack/Alb",
           "claim": {
             "framework": "cmmc2",
@@ -928,7 +1005,7 @@
           }
         }
       ],
-      "satisfaction": "supporting"
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -1578,6 +1655,17 @@
             "evidence": "Point-in-time recovery enabled with a 35-day window",
             "caveat": "Allows restore to any second in the window. Does not evidence that a restore has ever been tested, nor retention beyond the window."
           }
+        },
+        {
+          "path": "ReferenceStack/AccountBaseline/AuditBucket/Bucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "MP.L2-3.8.9",
+            "satisfaction": "supporting",
+            "evidence": "Versioning enabled, so overwritten and deleted objects remain recoverable",
+            "caveat": "Versioning is not backup. There is no replication or lifecycle-governed retention here - see SecureBucket, and configure replication if your risk assessment needs it."
+          }
         }
       ],
       "satisfaction": "partial"
@@ -1697,7 +1785,20 @@
         "nist800171": "3.11.1",
         "title": "Periodically assess the risk to organizational operations (including mission, functions, image, or reputation), organizational assets, and individuals, resulting from the operation of organizational systems and the associated processing, storage, or transmission of CUI"
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/AccountBaseline",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "RA.L2-3.11.1",
+            "satisfaction": "supporting",
+            "evidence": "Continuous control evaluation and threat detection produce the findings a risk assessment draws on",
+            "caveat": "Supplies inputs. A risk assessment weighs impact against mission and is a document somebody writes, not an output of any of these services."
+          }
+        }
+      ],
+      "satisfaction": "supporting"
     },
     {
       "practice": {
@@ -1710,7 +1811,31 @@
         "nist800171": "3.11.2",
         "title": "Scan for vulnerabilities in organizational systems and applications periodically and when new vulnerabilities affecting those systems and applications are identified."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/AccountBaseline/SecurityHub",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "RA.L2-3.11.2",
+            "satisfaction": "supporting",
+            "evidence": "Security Hub aggregates configuration findings across the account",
+            "caveat": "Covers configuration weaknesses. Software vulnerability scanning needs Amazon Inspector or an equivalent, which this construct does not enable."
+          }
+        },
+        {
+          "path": "ReferenceStack/AccountBaseline/GuardDuty",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "RA.L2-3.11.2",
+            "satisfaction": "supporting",
+            "evidence": "Continuous threat detection across the account",
+            "caveat": "Finds active threats rather than latent vulnerabilities. Vulnerability scanning proper needs Amazon Inspector or an equivalent."
+          }
+        }
+      ],
+      "satisfaction": "supporting"
     },
     {
       "practice": {
@@ -1736,7 +1861,20 @@
         "nist800171": "3.12.1",
         "title": "Periodically assess the security controls in organizational systems to determine if the controls are effective in their application."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/AccountBaseline/SecurityHub",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "CA.L2-3.12.1",
+            "satisfaction": "supporting",
+            "evidence": "Automated control assessment against NIST 800-53 Rev 5, re-evaluated on change",
+            "caveat": "Assesses the technical controls Security Hub knows how to check. A periodic assessment of the whole system, including the organizational practices, is a separate exercise."
+          }
+        }
+      ],
+      "satisfaction": "supporting"
     },
     {
       "practice": {
@@ -1762,7 +1900,31 @@
         "nist800171": "3.12.3",
         "title": "Monitor security controls on an ongoing basis to ensure the continued effectiveness of the controls."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/AccountBaseline/ConfigRecorder",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "CA.L2-3.12.3",
+            "satisfaction": "partial",
+            "evidence": "Configuration of every supported resource type, including global resources, recorded continuously with a one hour snapshot",
+            "caveat": "Records what the configuration is and when it changed. Whether a change was authorised is answered by CloudTrail and by change control, not here."
+          }
+        },
+        {
+          "path": "ReferenceStack/AccountBaseline/SecurityHub",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "CA.L2-3.12.3",
+            "satisfaction": "partial",
+            "evidence": "Security Hub enabled with NIST_800_53_R5, AWS_FOUNDATIONAL, CIS_3, evaluating controls continuously",
+            "caveat": "Provides the ongoing evaluation. It does not act on the results - somebody has to triage findings, and that is a process control."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -2013,6 +2175,17 @@
               "NIST.800.53.R5-SNSTopicSSLPublishOnly"
             ],
             "caveat": "Enforces TLS for publishers. Delivery to subscribers uses whatever protocol the subscription specifies, which this construct does not control."
+          }
+        },
+        {
+          "path": "ReferenceStack/AccountBaseline/AuditBucket/Bucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.8",
+            "satisfaction": "partial",
+            "evidence": "Bucket policy denies all requests where aws:SecureTransport is false",
+            "caveat": "Enforces TLS at the bucket. Does not evidence protection of CUI in transit elsewhere in the system."
           }
         },
         {
@@ -2406,7 +2579,21 @@
           }
         },
         {
-          "path": "ReferenceStack/TrailLogs",
+          "path": "ReferenceStack/AccountBaseline/AuditBucket/Bucket",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SC.L2-3.13.16",
+            "satisfaction": "partial",
+            "evidence": "BucketEncryption=KMS with a customer-managed key; default encryption applies to all new objects",
+            "nagRuleIds": [
+              "NIST.800.53.R5-S3DefaultEncryptionKMS"
+            ],
+            "caveat": "Objects written before this setting, or copied in with an explicit override, are not covered. Key custody and rotation are properties of the KMS key."
+          }
+        },
+        {
+          "path": "ReferenceStack/AccountBaseline/TrailLogGroup",
           "claim": {
             "framework": "cmmc2",
             "frameworkRevision": "rev2",
@@ -2564,9 +2751,20 @@
             "evidence": "Container Insights enabled, emitting task and container level metrics",
             "caveat": "Produces the telemetry. Monitoring for attacks means someone alerting on it, which is not something a cluster can do for you."
           }
+        },
+        {
+          "path": "ReferenceStack/AccountBaseline/GuardDuty",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SI.L2-3.14.6",
+            "satisfaction": "partial",
+            "evidence": "GuardDuty enabled, analysing VPC flow logs, DNS queries and CloudTrail events, publishing findings every 15 minutes",
+            "caveat": "Monitors the traffic and API activity AWS can see. It does not inspect payloads, and nothing here routes a finding to a human - alerting is a separate arrangement."
+          }
         }
       ],
-      "satisfaction": "supporting"
+      "satisfaction": "partial"
     },
     {
       "practice": {
@@ -2579,7 +2777,20 @@
         "nist800171": "3.14.7",
         "title": "Identify unauthorized use of organizational systems."
       },
-      "claims": []
+      "claims": [
+        {
+          "path": "ReferenceStack/AccountBaseline/GuardDuty",
+          "claim": {
+            "framework": "cmmc2",
+            "frameworkRevision": "rev2",
+            "controlId": "SI.L2-3.14.7",
+            "satisfaction": "partial",
+            "evidence": "Detects credential misuse, anomalous API calls and communication with known-bad hosts",
+            "caveat": "Identifies use that looks unauthorised to a detector trained on general patterns. Whether a given action was authorised in your organisation is not something it knows."
+          }
+        }
+      ],
+      "satisfaction": "partial"
     }
   ],
   "untaggable": [
@@ -2744,12 +2955,44 @@
       "cfnType": "AWS::IAM::Policy"
     },
     {
-      "path": "ReferenceStack/ServiceLogs/Bucket/Policy/Resource",
+      "path": "ReferenceStack/AccountBaseline/AuditBucket/AccessLogs/Policy/Resource",
       "cfnType": "AWS::S3::BucketPolicy"
     },
     {
-      "path": "ReferenceStack/Trail/LogsRole/DefaultPolicy/Resource",
+      "path": "ReferenceStack/AccountBaseline/AuditBucket/Bucket/Policy/Resource",
+      "cfnType": "AWS::S3::BucketPolicy"
+    },
+    {
+      "path": "ReferenceStack/AccountBaseline/Trail/LogsRole/DefaultPolicy/Resource",
       "cfnType": "AWS::IAM::Policy"
+    },
+    {
+      "path": "ReferenceStack/AccountBaseline/ConfigRecorder/DeliveryPolicy/Resource",
+      "cfnType": "AWS::IAM::ManagedPolicy"
+    },
+    {
+      "path": "ReferenceStack/AccountBaseline/ConfigRecorder/Recorder",
+      "cfnType": "AWS::Config::ConfigurationRecorder"
+    },
+    {
+      "path": "ReferenceStack/AccountBaseline/ConfigRecorder/DeliveryChannel",
+      "cfnType": "AWS::Config::DeliveryChannel"
+    },
+    {
+      "path": "ReferenceStack/AccountBaseline/SecurityHub/StandardNIST_800_53_R5",
+      "cfnType": "AWS::SecurityHub::Standard"
+    },
+    {
+      "path": "ReferenceStack/AccountBaseline/SecurityHub/StandardAWS_FOUNDATIONAL",
+      "cfnType": "AWS::SecurityHub::Standard"
+    },
+    {
+      "path": "ReferenceStack/AccountBaseline/SecurityHub/StandardCIS_3",
+      "cfnType": "AWS::SecurityHub::Standard"
+    },
+    {
+      "path": "ReferenceStack/ServiceLogs/Bucket/Policy/Resource",
+      "cfnType": "AWS::S3::BucketPolicy"
     },
     {
       "path": "ReferenceStack/Processor/DeadLetterQueue/Policy/Resource",
@@ -2775,6 +3018,8 @@
         "ReferenceStack/CuiBucket/AccessLogs/Resource",
         "ReferenceStack/CuiBucket/Bucket/Resource",
         "ReferenceStack/StandaloneBucket/Resource",
+        "ReferenceStack/AccountBaseline/AuditBucket/AccessLogs/Resource",
+        "ReferenceStack/AccountBaseline/AuditBucket/Bucket/Resource",
         "ReferenceStack/ServiceLogs/Bucket/Resource"
       ]
     },
@@ -2829,7 +3074,7 @@
       "resources": [
         "ReferenceStack/Network/FlowLog/IAMRole/DefaultPolicy/Resource",
         "ReferenceStack/TaskDefinition/ExecutionRole/DefaultPolicy/Resource",
-        "ReferenceStack/Trail/LogsRole/DefaultPolicy/Resource",
+        "ReferenceStack/AccountBaseline/Trail/LogsRole/DefaultPolicy/Resource",
         "ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource"
       ]
     },

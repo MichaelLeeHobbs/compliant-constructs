@@ -39,7 +39,15 @@ ReferenceStack/Network/FlowLog/IAMRole/DefaultPolicy/Resource,AWS::IAM::Policy,C
 ReferenceStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role,AWS::IAM::Role,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler,AWS::Lambda::Function,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/TaskDefinition/ExecutionRole/DefaultPolicy/Resource,AWS::IAM::Policy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/AccountBaseline/AuditBucket/AccessLogs/Policy/Resource,AWS::S3::BucketPolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/AccountBaseline/AuditBucket/Bucket/Policy/Resource,AWS::S3::BucketPolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/AccountBaseline/Trail/LogsRole/DefaultPolicy/Resource,AWS::IAM::Policy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/AccountBaseline/ConfigRecorder/DeliveryPolicy/Resource,AWS::IAM::ManagedPolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/AccountBaseline/ConfigRecorder/Recorder,AWS::Config::ConfigurationRecorder,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/AccountBaseline/ConfigRecorder/DeliveryChannel,AWS::Config::DeliveryChannel,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/AccountBaseline/SecurityHub/StandardNIST_800_53_R5,AWS::SecurityHub::Standard,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/AccountBaseline/SecurityHub/StandardAWS_FOUNDATIONAL,AWS::SecurityHub::Standard,CloudFormation resource type has no tags property; CDK tagging cannot reach it
+ReferenceStack/AccountBaseline/SecurityHub/StandardCIS_3,AWS::SecurityHub::Standard,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/ServiceLogs/Bucket/Policy/Resource,AWS::S3::BucketPolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
-ReferenceStack/Trail/LogsRole/DefaultPolicy/Resource,AWS::IAM::Policy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/Processor/DeadLetterQueue/Policy/Resource,AWS::SQS::QueuePolicy,CloudFormation resource type has no tags property; CDK tagging cannot reach it
 ReferenceStack/Processor/Function/ServiceRole/DefaultPolicy/Resource,AWS::IAM::Policy,CloudFormation resource type has no tags property; CDK tagging cannot reach it

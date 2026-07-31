@@ -81,6 +81,11 @@
       "import": "./dist/cmmc2/aws-cloudtrail/index.mjs",
       "require": "./dist/cmmc2/aws-cloudtrail/index.js"
     },
+    "./cmmc2/aws-config": {
+      "types": "./dist/cmmc2/aws-config/index.d.ts",
+      "import": "./dist/cmmc2/aws-config/index.mjs",
+      "require": "./dist/cmmc2/aws-config/index.js"
+    },
     "./cmmc2/aws-dynamodb": {
       "types": "./dist/cmmc2/aws-dynamodb/index.d.ts",
       "import": "./dist/cmmc2/aws-dynamodb/index.mjs",
@@ -105,6 +110,11 @@
       "types": "./dist/cmmc2/aws-elasticloadbalancingv2/index.d.ts",
       "import": "./dist/cmmc2/aws-elasticloadbalancingv2/index.mjs",
       "require": "./dist/cmmc2/aws-elasticloadbalancingv2/index.js"
+    },
+    "./cmmc2/aws-guardduty": {
+      "types": "./dist/cmmc2/aws-guardduty/index.d.ts",
+      "import": "./dist/cmmc2/aws-guardduty/index.mjs",
+      "require": "./dist/cmmc2/aws-guardduty/index.js"
     },
     "./cmmc2/aws-kms": {
       "types": "./dist/cmmc2/aws-kms/index.d.ts",
@@ -135,6 +145,11 @@
       "types": "./dist/cmmc2/aws-secretsmanager/index.d.ts",
       "import": "./dist/cmmc2/aws-secretsmanager/index.mjs",
       "require": "./dist/cmmc2/aws-secretsmanager/index.js"
+    },
+    "./cmmc2/aws-securityhub": {
+      "types": "./dist/cmmc2/aws-securityhub/index.d.ts",
+      "import": "./dist/cmmc2/aws-securityhub/index.mjs",
+      "require": "./dist/cmmc2/aws-securityhub/index.js"
     },
     "./cmmc2/aws-sns": {
       "types": "./dist/cmmc2/aws-sns/index.d.ts",
